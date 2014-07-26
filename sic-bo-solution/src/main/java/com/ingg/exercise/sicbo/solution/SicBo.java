@@ -7,6 +7,7 @@ import com.ingg.exercise.sicbo.model.Table;
 import com.ingg.exercise.sicbo.model.exception.TableClosedException;
 import net.jcip.annotations.ThreadSafe;
 
+import javax.xml.transform.Result;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -37,8 +38,7 @@ public class SicBo implements Table, DealerObserver {
 
     private BetAcceptor betAcceptor;
     private RandomStringGenerator randomStringGenerator;
-    private Iterable<Integer> currentRoll;
-    private String currentSalt;
+    private String currentRoundId;
 
     public SicBo(ResultDisplay resultDisplay, Dealer dealer, BetAcceptorFactory betAcceptorFactory, RandomStringGenerator randomStringGenerator) {
         this.resultDisplay = resultDisplay;
@@ -64,14 +64,14 @@ public class SicBo implements Table, DealerObserver {
     }
 
     private void startNewRound() {
-        String currentRoundId = randomStringGenerator.generateString();
+        currentRoundId = randomStringGenerator.generateString();
         betAcceptor = betAcceptorFactory.createNewAcceptor(currentRoundId);
     }
 
     @Override
     public void close() {
-        dealer.stop();
-        betAcceptor.finishRound(currentRoll,currentSalt);
+        Iterable<Integer> lastRoll = dealer.stop();
+        finishRound(lastRoll);
     }
 
     @Override
@@ -84,6 +84,26 @@ public class SicBo implements Table, DealerObserver {
 
     @Override
     public void newRoll(Iterable<Integer> roll) {
+        finishRound(roll);
+        resultDisplay.displayResult(currentRoundId,roll);
+        startNewRound();
+    }
 
+    private void finishRound(Iterable<Integer> roll) {
+        RoundResult result = new RoundResultPojo(roll);
+        betAcceptor.finishRound(result);
+    }
+
+    private class RoundResultPojo implements RoundResult {
+        private Iterable<Integer> roll;
+
+        private RoundResultPojo(Iterable<Integer> roll) {
+            this.roll = roll;
+        }
+
+        @Override
+        public Iterable<Integer> getRoll() {
+            return roll;
+        }
     }
 }

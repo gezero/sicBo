@@ -89,7 +89,6 @@ public class ProvablyFairSicBo implements Table, DealerObserver {
     @Override
     public void close() {
         dealer.stop();
-        betAcceptor.finishRound(currentRoll,currentSalt);
     }
 
     @Override

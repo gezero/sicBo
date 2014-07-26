@@ -72,7 +72,7 @@ public class SicBoTest {
         } catch (TableClosedException e) {
             throw new RuntimeException("There should not have been any exceptions, but there was one", e);
         }
-        verify(betAcceptor).finishRound(anyCollectionOf(Integer.class), any(String.class));
+        verify(betAcceptor).finishRound(any(RoundResult.class));
         when(betAcceptor.acceptBet(Selection.BIG, 10)).thenThrow(new TableClosedException());
         sicBo.acceptBet(Selection.BIG, 10);
     }
