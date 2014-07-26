@@ -6,6 +6,10 @@ import com.ingg.exercise.sicbo.model.Selection;
 import com.ingg.exercise.sicbo.model.Table;
 import com.ingg.exercise.sicbo.model.exception.TableClosedException;
 import net.jcip.annotations.ThreadSafe;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 /**
  * <p>
@@ -32,10 +36,14 @@ public class SicBo implements Table, DealerObserver {
     private Dealer dealer;
 
     private String currentRound;
+    private SessionIdGenerator sessionIdGenerator;
+    private Iterable<Integer> currentRoll;
+    private String currentSalt;
 
-    public SicBo(ResultDisplay resultDisplay, Dealer dealer) {
+    public SicBo(ResultDisplay resultDisplay, Dealer dealer, SessionIdGenerator sessionIdGenerator) {
         this.resultDisplay = resultDisplay;
         this.dealer = dealer;
+        this.sessionIdGenerator = sessionIdGenerator;
     }
 
     /**
@@ -50,7 +58,30 @@ public class SicBo implements Table, DealerObserver {
 
     @Override
     public void open() {
-        dealer.subscribe(this);
+        Iterable<Integer> roll = dealer.subscribe(this);
+        generateNewRound(roll);
+    }
+
+    private void generateNewRound(Iterable<Integer> roll) {
+        closeOldRound();
+        currentRoll = roll;
+        currentSalt = sessionIdGenerator.sessionId();
+        StringBuilder builder = new StringBuilder();
+        builder.append(roll);
+        builder.append(currentSalt);
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            currentRound = new String(digest.digest(builder.toString().getBytes()));
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("SHA 256 was not found, now that is strange....");
+        }
+    }
+
+    private void closeOldRound() {
+        if (currentRound == null) {
+            return;
+        }
+        throw new NotImplementedException();
     }
 
     @Override
@@ -67,7 +98,7 @@ public class SicBo implements Table, DealerObserver {
     }
 
     @Override
-    public void newRoll(int i) {
+    public void newRoll(Iterable<Integer> roll) {
 
     }
 }

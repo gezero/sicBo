@@ -14,6 +14,8 @@ import org.mockito.Spy;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
+import java.util.Arrays;
+
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.doAnswer;
@@ -26,6 +28,9 @@ public class SicBoTest {
 
     @Mock
     Dealer dealer;
+    @Mock
+    SessionIdGenerator sessionIdGenerator;
+
     @Spy
     ResultDisplay consoleResultDisplay = new ConsoleResultDisplay();
 
@@ -41,6 +46,7 @@ public class SicBoTest {
 
     @Test
     public void testOpen() throws Exception {
+        when(dealer.subscribe(sicBo)).thenReturn(Arrays.asList(1, 2, 3));
         sicBo.open();
         sicBo.acceptBet(Selection.BIG, 10);
     }
@@ -50,21 +56,22 @@ public class SicBoTest {
 
         try {
             sicBo.open();
+            when(dealer.subscribe(sicBo)).thenReturn(Arrays.asList(1, 2, 3));
             sicBo.acceptBet(Selection.BIG, 10);
             sicBo.close();
+            when(dealer.stop()).thenReturn(Arrays.asList(1, 2, 3));
         } catch (TableClosedException e) {
             throw new RuntimeException("There should not have been any exceptions, but there was one",e);
         }
-        sicBo.acceptBet(Selection.BIG, 10);
-        Thread.sleep(5000);
         sicBo.acceptBet(Selection.BIG, 10);
     }
 
     @Test
     public void testAcceptBetLose() throws Exception {
         sicBo.open();
+        when(dealer.subscribe(sicBo)).thenReturn(Arrays.asList(1, 2, 3));
         BetFuture betFuture = sicBo.acceptBet(Selection.BIG, 10);
-        sicBo.newRoll(0);
+        sicBo.newRoll(Arrays.asList(1, 2, 3));
         assertThat(betFuture.getPrize(),is(0));
     }
     @Test
