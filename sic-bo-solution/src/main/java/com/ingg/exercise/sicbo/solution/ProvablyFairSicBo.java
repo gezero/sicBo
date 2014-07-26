@@ -29,7 +29,7 @@ import java.security.NoSuchAlgorithmException;
  * @author Jiri Peinlich
  */
 @ThreadSafe
-public class SicBo implements Table, DealerObserver {
+public class ProvablyFairSicBo implements Table, DealerObserver {
 
     private final ResultDisplay resultDisplay;
     private Dealer dealer;
@@ -40,7 +40,7 @@ public class SicBo implements Table, DealerObserver {
     private Iterable<Integer> currentRoll;
     private String currentSalt;
 
-    public SicBo(ResultDisplay resultDisplay, Dealer dealer, BetAcceptorFactory betAcceptorFactory, RandomStringGenerator randomStringGenerator) {
+    public ProvablyFairSicBo(ResultDisplay resultDisplay, Dealer dealer, BetAcceptorFactory betAcceptorFactory, RandomStringGenerator randomStringGenerator) {
         this.resultDisplay = resultDisplay;
         this.dealer = dealer;
         this.betAcceptorFactory = betAcceptorFactory;
@@ -52,20 +52,38 @@ public class SicBo implements Table, DealerObserver {
      * The following code I would rather put into configuration or autowiring of injecting dependencies. The
      * requirements however expect that this constructor exists and the evaluation program calls it.
      */
-    public SicBo(ResultDisplay resultDisplay) {
+    public ProvablyFairSicBo(ResultDisplay resultDisplay) {
         this.resultDisplay = resultDisplay;
         //TODO: do not forget to configure here the rest of dependencies before sending the solution back.
     }
 
     @Override
     public void open() {
-        dealer.subscribe(this);
-        startNewRound();
+        Iterable<Integer> roll = dealer.subscribe(this);
+        startNewRound(roll);
     }
 
-    private void startNewRound() {
-        String currentRoundId = randomStringGenerator.generateString();
+    private void startNewRound(Iterable<Integer> roll) {
+        currentRoll = roll;
+        currentSalt = randomStringGenerator.generateString();
+        String currentRoundId = createCurrentRoundId(roll);
         betAcceptor = betAcceptorFactory.createNewAcceptor(currentRoundId);
+    }
+
+    private String createCurrentRoundId(Iterable<Integer> roll) {
+        StringBuilder builder = new StringBuilder();
+        for (Integer integer : roll) {
+            builder.append(integer);
+        }
+        String currentRoundId;
+        builder.append(currentSalt);
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            currentRoundId = new String(digest.digest(builder.toString().getBytes()));
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("SHA 256 was not found, now that is strange....");
+        }
+        return currentRoundId;
     }
 
     @Override

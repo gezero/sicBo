@@ -90,24 +90,24 @@ public class SicBoTest {
 
     @Test
     public void testAcceptBetBigWin() throws Exception {
-        when(dealer.subscribe(sicBo)).thenReturn(BIG_ROLL);
+        when(dealer.subscribe(sicBo)).thenReturn(SMALL_ROLL);
         sicBo.open();
         BetFuture betFuture = sicBo.acceptBet(Selection.BIG, 10);
         assertThat(betFuture, is(notNullValue()));
         assertThat(betFuture.getRoundId(), is(notNullValue()));
 
-        sicBo.newRoll(SMALL_ROLL);
+        sicBo.newRoll(BIG_ROLL);
         assertThat(betFuture.getPrize(), is(20));
     }
 
     @Test
     public void testAcceptBetSmallLose() throws Exception {
-        when(dealer.subscribe(sicBo)).thenReturn(BIG_ROLL);
+        when(dealer.subscribe(sicBo)).thenReturn(SMALL_ROLL);
         sicBo.open();
         BetFuture betFuture = sicBo.acceptBet(Selection.SMALL, 10);
         assertThat(betFuture, is(notNullValue()));
         assertThat(betFuture.getRoundId(), is(notNullValue()));
-        sicBo.newRoll(SMALL_ROLL);
+        sicBo.newRoll(BIG_ROLL);
         assertThat(betFuture.getPrize(), is(0));
     }
 
@@ -121,5 +121,13 @@ public class SicBoTest {
 
         sicBo.newRoll(SMALL_ROLL);
         assertThat(betFuture.getPrize(), is(20));
+    }
+
+    @Test
+    public void testResultDisplay(){
+        when(dealer.subscribe(sicBo)).thenReturn(SMALL_ROLL);
+        sicBo.open();
+        sicBo.newRoll(SMALL_ROLL);
+        verify(consoleResultDisplay).displayResult(any(String.class),anyCollectionOf(Integer.class));
     }
 }

@@ -9,6 +9,7 @@ public interface Dealer {
      *
      * @param observer observer will be notified whenever dealer rolls again
      * @return integers representing values on dices.
+     * @see com.ingg.exercise.sicbo.solution.ProvablyFairSicBo
      */
     Iterable<Integer> subscribe(DealerObserver observer);
 
