@@ -20,6 +20,7 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyCollectionOf;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -78,49 +79,14 @@ public class SicBoTest {
     }
 
     @Test
-    public void testAcceptBetBigLose() throws Exception {
+    public void testAcceptBet() throws Exception {
         when(dealer.subscribe(sicBo)).thenReturn(SMALL_ROLL);
         sicBo.open();
-        BetFuture betFuture = sicBo.acceptBet(Selection.BIG, 10);
-        assertThat(betFuture, is(notNullValue()));
-        assertThat(betFuture.getRoundId(), is(notNullValue()));
-        sicBo.newRoll(SMALL_ROLL);
-        assertThat(betFuture.getPrize(), is(0));
-    }
 
-    @Test
-    public void testAcceptBetBigWin() throws Exception {
-        when(dealer.subscribe(sicBo)).thenReturn(SMALL_ROLL);
-        sicBo.open();
-        BetFuture betFuture = sicBo.acceptBet(Selection.BIG, 10);
-        assertThat(betFuture, is(notNullValue()));
-        assertThat(betFuture.getRoundId(), is(notNullValue()));
-
-        sicBo.newRoll(BIG_ROLL);
-        assertThat(betFuture.getPrize(), is(20));
-    }
-
-    @Test
-    public void testAcceptBetSmallLose() throws Exception {
-        when(dealer.subscribe(sicBo)).thenReturn(SMALL_ROLL);
-        sicBo.open();
+        BetFuture bet = mock(BetFuture.class);
+        when(betAcceptor.acceptBet(Selection.SMALL,10)).thenReturn(bet);
         BetFuture betFuture = sicBo.acceptBet(Selection.SMALL, 10);
-        assertThat(betFuture, is(notNullValue()));
-        assertThat(betFuture.getRoundId(), is(notNullValue()));
-        sicBo.newRoll(BIG_ROLL);
-        assertThat(betFuture.getPrize(), is(0));
-    }
-
-    @Test
-    public void testAcceptBetSmallWin() throws Exception {
-        when(dealer.subscribe(sicBo)).thenReturn(SMALL_ROLL);
-        sicBo.open();
-        BetFuture betFuture = sicBo.acceptBet(Selection.SMALL, 10);
-        assertThat(betFuture, is(notNullValue()));
-        assertThat(betFuture.getRoundId(), is(notNullValue()));
-
-        sicBo.newRoll(SMALL_ROLL);
-        assertThat(betFuture.getPrize(), is(20));
+        assertThat(betFuture, is(bet));
     }
 
     @Test
