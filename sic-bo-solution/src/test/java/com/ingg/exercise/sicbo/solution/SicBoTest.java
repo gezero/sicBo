@@ -7,10 +7,7 @@ import com.ingg.exercise.sicbo.model.Selection;
 import com.ingg.exercise.sicbo.model.exception.TableClosedException;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
+import org.mockito.*;
 
 import java.util.Arrays;
 import java.util.List;
@@ -42,6 +39,8 @@ public class SicBoTest {
     @Spy
     ResultDisplay consoleResultDisplay = new ConsoleResultDisplay();
     private final List<Integer> SMALL_ROLL = Arrays.asList(1, 2, 3);
+    @Captor
+    private ArgumentCaptor<RoundResult> captor;
 
     @Before
     public void setUp() {
@@ -95,5 +94,16 @@ public class SicBoTest {
         sicBo.open();
         sicBo.newRoll(SMALL_ROLL);
         verify(consoleResultDisplay).displayResult(any(String.class),anyCollectionOf(Integer.class));
+    }
+
+    @Test
+    public  void testNewRoll(){
+        when(dealer.subscribe(sicBo)).thenReturn(BIG_ROLL);
+        sicBo.open();
+        sicBo.newRoll(SMALL_ROLL);
+        verify(betAcceptor).finishRound(captor.capture());
+
+        RoundResult value = captor.getValue();
+        assertThat(value.getRoll(),is((Iterable<Integer>)SMALL_ROLL));
     }
 }
