@@ -88,7 +88,8 @@ public class SicBo implements Table, DealerObserver {
 
     @Override
     public void close() {
-        // TODO
+        dealer.stop();
+        betAcceptor.finishRound(currentRoll,currentSalt);
     }
 
     @Override
@@ -96,7 +97,7 @@ public class SicBo implements Table, DealerObserver {
         if (betAcceptor == null) {
             throw new TableClosedException();
         }
-        return null;
+        return betAcceptor.acceptBet(selection,stake);
     }
 
     @Override

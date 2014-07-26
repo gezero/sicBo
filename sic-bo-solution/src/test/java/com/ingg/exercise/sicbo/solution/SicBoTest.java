@@ -18,6 +18,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyCollectionOf;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class SicBoTest {
@@ -59,14 +61,16 @@ public class SicBoTest {
     public void testClose() throws Exception {
 
         try {
-            sicBo.open();
             when(dealer.subscribe(sicBo)).thenReturn(Arrays.asList(1, 2, 3));
+            sicBo.open();
             sicBo.acceptBet(Selection.BIG, 10);
-            sicBo.close();
             when(dealer.stop()).thenReturn(Arrays.asList(1, 2, 3));
+            sicBo.close();
         } catch (TableClosedException e) {
             throw new RuntimeException("There should not have been any exceptions, but there was one",e);
         }
+        verify(betAcceptor).finishRound(anyCollectionOf(Integer.class),any(String.class));
+        when(betAcceptor.acceptBet(Selection.BIG,10)).thenThrow(new TableClosedException());
         sicBo.acceptBet(Selection.BIG, 10);
     }
 
