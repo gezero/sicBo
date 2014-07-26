@@ -13,6 +13,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
 import java.util.Arrays;
+import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -24,6 +25,7 @@ import static org.mockito.Mockito.when;
 
 public class SicBoTest {
 
+    private final List<Integer> BIG_ROLL = Arrays.asList(5, 5, 5);
     @InjectMocks
     SicBo sicBo;
 
@@ -38,6 +40,7 @@ public class SicBoTest {
 
     @Spy
     ResultDisplay consoleResultDisplay = new ConsoleResultDisplay();
+    private final List<Integer> SMALL_ROLL = Arrays.asList(1, 2, 3);
 
     @Before
     public void setUp() {
@@ -52,7 +55,7 @@ public class SicBoTest {
 
     @Test
     public void testOpen() throws Exception {
-        when(dealer.subscribe(sicBo)).thenReturn(Arrays.asList(1, 2, 3));
+        when(dealer.subscribe(sicBo)).thenReturn(SMALL_ROLL);
         sicBo.open();
         sicBo.acceptBet(Selection.BIG, 10);
     }
@@ -61,36 +64,62 @@ public class SicBoTest {
     public void testClose() throws Exception {
 
         try {
-            when(dealer.subscribe(sicBo)).thenReturn(Arrays.asList(1, 2, 3));
+            when(dealer.subscribe(sicBo)).thenReturn(SMALL_ROLL);
             sicBo.open();
             sicBo.acceptBet(Selection.BIG, 10);
-            when(dealer.stop()).thenReturn(Arrays.asList(1, 2, 3));
+            when(dealer.stop()).thenReturn(SMALL_ROLL);
             sicBo.close();
         } catch (TableClosedException e) {
-            throw new RuntimeException("There should not have been any exceptions, but there was one",e);
+            throw new RuntimeException("There should not have been any exceptions, but there was one", e);
         }
-        verify(betAcceptor).finishRound(anyCollectionOf(Integer.class),any(String.class));
-        when(betAcceptor.acceptBet(Selection.BIG,10)).thenThrow(new TableClosedException());
+        verify(betAcceptor).finishRound(anyCollectionOf(Integer.class), any(String.class));
+        when(betAcceptor.acceptBet(Selection.BIG, 10)).thenThrow(new TableClosedException());
         sicBo.acceptBet(Selection.BIG, 10);
     }
 
     @Test
-    public void testAcceptBetLose() throws Exception {
+    public void testAcceptBetBigLose() throws Exception {
+        when(dealer.subscribe(sicBo)).thenReturn(SMALL_ROLL);
         sicBo.open();
-        when(dealer.subscribe(sicBo)).thenReturn(Arrays.asList(1, 2, 3));
         BetFuture betFuture = sicBo.acceptBet(Selection.BIG, 10);
-        sicBo.newRoll(Arrays.asList(1, 2, 3));
-        assertThat(betFuture.getPrize(),is(0));
+        assertThat(betFuture, is(notNullValue()));
+        assertThat(betFuture.getRoundId(), is(notNullValue()));
+        sicBo.newRoll(SMALL_ROLL);
+        assertThat(betFuture.getPrize(), is(0));
     }
+
     @Test
-    public void testAcceptBetWin() throws Exception {
-        when(dealer.subscribe(sicBo)).thenReturn(Arrays.asList(5, 5, 5));
+    public void testAcceptBetBigWin() throws Exception {
+        when(dealer.subscribe(sicBo)).thenReturn(BIG_ROLL);
         sicBo.open();
         BetFuture betFuture = sicBo.acceptBet(Selection.BIG, 10);
-        assertThat(betFuture,is(notNullValue()));
-        assertThat(betFuture.getRoundId(),is(notNullValue()));
+        assertThat(betFuture, is(notNullValue()));
+        assertThat(betFuture.getRoundId(), is(notNullValue()));
 
-        sicBo.newRoll(Arrays.asList(1,2,3));
-        assertThat(betFuture.getPrize(),is(20));
+        sicBo.newRoll(SMALL_ROLL);
+        assertThat(betFuture.getPrize(), is(20));
+    }
+
+    @Test
+    public void testAcceptBetSmallLose() throws Exception {
+        when(dealer.subscribe(sicBo)).thenReturn(BIG_ROLL);
+        sicBo.open();
+        BetFuture betFuture = sicBo.acceptBet(Selection.SMALL, 10);
+        assertThat(betFuture, is(notNullValue()));
+        assertThat(betFuture.getRoundId(), is(notNullValue()));
+        sicBo.newRoll(SMALL_ROLL);
+        assertThat(betFuture.getPrize(), is(0));
+    }
+
+    @Test
+    public void testAcceptBetSmallWin() throws Exception {
+        when(dealer.subscribe(sicBo)).thenReturn(SMALL_ROLL);
+        sicBo.open();
+        BetFuture betFuture = sicBo.acceptBet(Selection.SMALL, 10);
+        assertThat(betFuture, is(notNullValue()));
+        assertThat(betFuture.getRoundId(), is(notNullValue()));
+
+        sicBo.newRoll(SMALL_ROLL);
+        assertThat(betFuture.getPrize(), is(20));
     }
 }
