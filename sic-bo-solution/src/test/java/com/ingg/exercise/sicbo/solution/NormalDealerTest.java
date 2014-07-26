@@ -13,7 +13,7 @@ public class NormalDealerTest {
 
     @Test
     public void testFlow() throws Exception {
-        NormalDealer dealer = new NormalDealer(new SessionRandomGenerator(),100);
+        NormalDealer dealer = new NormalDealer(new SessionRandomGenerator(),300);
 
         RollCollector rollCollector = new RollCollector();
         Iterable<Integer> firstRoll = dealer.subscribe(rollCollector);
@@ -27,7 +27,7 @@ public class NormalDealerTest {
 
         Thread.sleep(1000);
 
-        assertThat(rollCollector.getList().size(),is(10));
+        assertThat(rollCollector.getList().size(),is(3));
 
     }
 
