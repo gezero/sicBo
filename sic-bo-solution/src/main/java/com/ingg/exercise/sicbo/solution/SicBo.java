@@ -23,7 +23,7 @@ import net.jcip.annotations.ThreadSafe;
  * </ul>
  * </p>
  *
- * @author YOUR NAME HERE
+ * @author Jiri Peinlich
  */
 @ThreadSafe
 public class SicBo implements Table {
