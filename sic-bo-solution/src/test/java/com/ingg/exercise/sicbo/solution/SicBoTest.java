@@ -13,13 +13,10 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyCollectionOf;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class SicBoTest {
 
@@ -83,27 +80,27 @@ public class SicBoTest {
         sicBo.open();
 
         BetFuture bet = mock(BetFuture.class);
-        when(betAcceptor.acceptBet(Selection.SMALL,10)).thenReturn(bet);
+        when(betAcceptor.acceptBet(Selection.SMALL, 10)).thenReturn(bet);
         BetFuture betFuture = sicBo.acceptBet(Selection.SMALL, 10);
         assertThat(betFuture, is(bet));
     }
 
     @Test
-    public void testResultDisplay(){
+    public void testResultDisplay() {
         when(dealer.subscribe(sicBo)).thenReturn(SMALL_ROLL);
         sicBo.open();
         sicBo.newRoll(SMALL_ROLL);
-        verify(consoleResultDisplay).displayResult(any(String.class),anyCollectionOf(Integer.class));
+        verify(consoleResultDisplay).displayResult(any(String.class), anyCollectionOf(Integer.class));
     }
 
     @Test
-    public  void testNewRoll(){
+    public void testNewRoll() {
         when(dealer.subscribe(sicBo)).thenReturn(BIG_ROLL);
         sicBo.open();
         sicBo.newRoll(SMALL_ROLL);
         verify(betAcceptor).finishRound(captor.capture());
 
         RoundResult value = captor.getValue();
-        assertThat(value.getRoll(),is((Iterable<Integer>)SMALL_ROLL));
+        assertThat(value.getRoll(), is((Iterable<Integer>) SMALL_ROLL));
     }
 }
