@@ -16,6 +16,7 @@ import org.mockito.stubbing.Answer;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
 
 public class SicBoTest {
@@ -62,15 +63,13 @@ public class SicBoTest {
     @Test
     public void testAcceptBetLose() throws Exception {
         sicBo.open();
-        when(dealer.roll()).thenAnswer(new DelayedAnswer<Object>(9, 100));
         BetFuture betFuture = sicBo.acceptBet(Selection.BIG, 10);
+        sicBo.newRoll(0);
         assertThat(betFuture.getPrize(),is(0));
     }
     @Test
     public void testAcceptBetWin() throws Exception {
         sicBo.open();
-
-        when(dealer.roll()).thenAnswer(new DelayedAnswer<Object>(11, 100));
         BetFuture betFuture = sicBo.acceptBet(Selection.BIG, 10);
 
         assertThat(betFuture.getPrize(),is(20));

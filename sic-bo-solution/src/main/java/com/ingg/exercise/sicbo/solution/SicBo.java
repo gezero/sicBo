@@ -1,9 +1,9 @@
 package com.ingg.exercise.sicbo.solution;
 
 import com.ingg.exercise.sicbo.model.BetFuture;
-import com.ingg.exercise.sicbo.model.Table;
 import com.ingg.exercise.sicbo.model.ResultDisplay;
 import com.ingg.exercise.sicbo.model.Selection;
+import com.ingg.exercise.sicbo.model.Table;
 import com.ingg.exercise.sicbo.model.exception.TableClosedException;
 import net.jcip.annotations.ThreadSafe;
 
@@ -26,17 +26,31 @@ import net.jcip.annotations.ThreadSafe;
  * @author Jiri Peinlich
  */
 @ThreadSafe
-public class SicBo implements Table {
+public class SicBo implements Table, DealerObserver {
 
     private final ResultDisplay resultDisplay;
+    private Dealer dealer;
 
+    private String currentRound;
+
+    public SicBo(ResultDisplay resultDisplay, Dealer dealer) {
+        this.resultDisplay = resultDisplay;
+        this.dealer = dealer;
+    }
+
+    /**
+     * The constraint to have predefined construction is strange. It limits the way how to inject dependencies properly.
+     * The following code I would rather put into configuration or autowiring of injecting dependencies. The
+     * requirements however expect that this constructor exists and the evaluation program calls it.
+     */
     public SicBo(ResultDisplay resultDisplay) {
         this.resultDisplay = resultDisplay;
+        //TODO: do not forget to configure here the rest of dependencies before sending the solution back.
     }
 
     @Override
     public void open() {
-        // TODO
+        dealer.subscribe(this);
     }
 
     @Override
@@ -46,8 +60,14 @@ public class SicBo implements Table {
 
     @Override
     public BetFuture acceptBet(Selection selection, Integer stake) throws TableClosedException {
-        // TODO
+        if (currentRound == null) {
+            throw new TableClosedException();
+        }
         return null;
     }
 
+    @Override
+    public void newRoll(int i) {
+
+    }
 }
