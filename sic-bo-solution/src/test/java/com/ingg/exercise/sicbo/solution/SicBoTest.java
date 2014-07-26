@@ -11,14 +11,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 
 import java.util.Arrays;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
 public class SicBoTest {
@@ -29,7 +28,11 @@ public class SicBoTest {
     @Mock
     Dealer dealer;
     @Mock
-    SessionIdGenerator sessionIdGenerator;
+    RandomStringGenerator randomStringGenerator;
+    @Mock
+    BetAcceptorFactory betAcceptorFactory;
+    @Mock
+    BetAcceptor betAcceptor;
 
     @Spy
     ResultDisplay consoleResultDisplay = new ConsoleResultDisplay();
@@ -37,6 +40,7 @@ public class SicBoTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        when(betAcceptorFactory.createNewAcceptor(any(String.class))).thenReturn(betAcceptor);
     }
 
     @Test(expected = TableClosedException.class)
@@ -76,26 +80,13 @@ public class SicBoTest {
     }
     @Test
     public void testAcceptBetWin() throws Exception {
+        when(dealer.subscribe(sicBo)).thenReturn(Arrays.asList(5, 5, 5));
         sicBo.open();
         BetFuture betFuture = sicBo.acceptBet(Selection.BIG, 10);
+        assertThat(betFuture,is(notNullValue()));
+        assertThat(betFuture.getRoundId(),is(notNullValue()));
 
+        sicBo.newRoll(Arrays.asList(1,2,3));
         assertThat(betFuture.getPrize(),is(20));
-    }
-
-    public class DelayedAnswer<T> implements Answer<T>{
-
-        private T answer;
-        private long delay;
-
-        public DelayedAnswer(T answer, long delay) {
-            this.answer = answer;
-            this.delay = delay;
-        }
-
-        @Override
-        public T answer(InvocationOnMock invocationOnMock) throws Throwable {
-            Thread.sleep(delay);
-            return answer;
-        }
     }
 }

@@ -6,7 +6,6 @@ import com.ingg.exercise.sicbo.model.Selection;
 import com.ingg.exercise.sicbo.model.Table;
 import com.ingg.exercise.sicbo.model.exception.TableClosedException;
 import net.jcip.annotations.ThreadSafe;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -34,16 +33,18 @@ public class SicBo implements Table, DealerObserver {
 
     private final ResultDisplay resultDisplay;
     private Dealer dealer;
+    private BetAcceptorFactory betAcceptorFactory;
 
-    private String currentRound;
-    private SessionIdGenerator sessionIdGenerator;
+    private BetAcceptor betAcceptor;
+    private RandomStringGenerator randomStringGenerator;
     private Iterable<Integer> currentRoll;
     private String currentSalt;
 
-    public SicBo(ResultDisplay resultDisplay, Dealer dealer, SessionIdGenerator sessionIdGenerator) {
+    public SicBo(ResultDisplay resultDisplay, Dealer dealer, BetAcceptorFactory betAcceptorFactory, RandomStringGenerator randomStringGenerator) {
         this.resultDisplay = resultDisplay;
         this.dealer = dealer;
-        this.sessionIdGenerator = sessionIdGenerator;
+        this.betAcceptorFactory = betAcceptorFactory;
+        this.randomStringGenerator = randomStringGenerator;
     }
 
     /**
@@ -59,29 +60,30 @@ public class SicBo implements Table, DealerObserver {
     @Override
     public void open() {
         Iterable<Integer> roll = dealer.subscribe(this);
-        generateNewRound(roll);
+        startNewRound(roll);
     }
 
-    private void generateNewRound(Iterable<Integer> roll) {
-        closeOldRound();
+    private void startNewRound(Iterable<Integer> roll) {
         currentRoll = roll;
-        currentSalt = sessionIdGenerator.sessionId();
+        currentSalt = randomStringGenerator.generateString();
+        String currentRoundId = createCurrentRoundId(roll);
+        betAcceptor = betAcceptorFactory.createNewAcceptor(currentRoundId);
+    }
+
+    private String createCurrentRoundId(Iterable<Integer> roll) {
         StringBuilder builder = new StringBuilder();
-        builder.append(roll);
+        for (Integer integer : roll) {
+            builder.append(integer);
+        }
+        String currentRoundId;
         builder.append(currentSalt);
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            currentRound = new String(digest.digest(builder.toString().getBytes()));
+            currentRoundId = new String(digest.digest(builder.toString().getBytes()));
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException("SHA 256 was not found, now that is strange....");
         }
-    }
-
-    private void closeOldRound() {
-        if (currentRound == null) {
-            return;
-        }
-        throw new NotImplementedException();
+        return currentRoundId;
     }
 
     @Override
@@ -91,7 +93,7 @@ public class SicBo implements Table, DealerObserver {
 
     @Override
     public BetFuture acceptBet(Selection selection, Integer stake) throws TableClosedException {
-        if (currentRound == null) {
+        if (betAcceptor == null) {
             throw new TableClosedException();
         }
         return null;
