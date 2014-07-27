@@ -6,12 +6,15 @@ import com.ingg.exercise.sicbo.model.exception.TableClosedException;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * This class is responsible for handling bets. It creates new BetFuture objects and calculate prices after the roll.
+ *
  * @author Jiri
  */
 public class SimpleBetAcceptor implements BetAcceptor {
@@ -26,20 +29,22 @@ public class SimpleBetAcceptor implements BetAcceptor {
     /**
      * Creates new BetFuture object that will contain price when the roll happens. The method for getting price will
      * block until the roll happens.
+     *
      * @param selection Player has to pick one of the selection options
-     * @param stake Amount of money that player can bet
+     * @param stake     Amount of money that player can bet
      * @return
      * @throws TableClosedException
      */
     @Override
     public synchronized BetFuture acceptBet(Selection selection, Integer stake) throws TableClosedException {
-        if (!active){
+        if (!active) {
             throw new TableClosedException();
         }
         checkNotNull(selection);
         checkNotNull(stake);
-        if (stake>Integer.MAX_VALUE /2){
-            throw new ArithmeticException("Bet is to high, If you would win, we would not be able to calculate how much.");
+        if (stake > Integer.MAX_VALUE / 2) {
+            throw new ArithmeticException("Bet is to high, If you would win, we would not be able to calculate how much. " +
+                    "Try to split the bet into few smaller ones...");
         }
         Bet bet = new Bet(roundId, selection, stake);
         bets.add(bet);
@@ -49,13 +54,14 @@ public class SimpleBetAcceptor implements BetAcceptor {
     /**
      * Handles calculating of prices. It will be done in separate thread so that current thread does not need to wait
      * for calculation to finish.
+     *
      * @param result result of a dealers roll.
      */
     @Override
     public synchronized void finishRound(RoundResult result) {
         checkNotNull(result);
         Executor executor = Executors.newSingleThreadExecutor();
-        executor.execute(new CalculatePrices(bets,result));
+        executor.execute(new CalculatePrices(bets, result));
         active = false;
     }
 
@@ -84,21 +90,22 @@ public class SimpleBetAcceptor implements BetAcceptor {
 
         /**
          * If the price is not known yet, the method will block.
+         *
          * @return price that the player receives depending on the bet and stake that he made and roll that was done
          * @throws InterruptedException
          */
         @Override
-        public Integer getPrize() throws InterruptedException{
+        public Integer getPrize() throws InterruptedException {
             latch.await();
             return price;
         }
 
         public void calculatePrice(Selection selectionResult) {
-            if (price!= null){
+            if (price != null) {
                 throw new RuntimeException("Price can be calculated only once");
             }
             checkNotNull(selectionResult);
-            price = selectionResult.equals(selection)?stake*2:0;
+            price = selectionResult.equals(selection) ? stake * 2 : 0;
             latch.countDown();
         }
     }
@@ -122,7 +129,7 @@ public class SimpleBetAcceptor implements BetAcceptor {
             for (Integer integer : result.getRoll()) {
                 total += integer;
             }
-            Selection resultSelection = total >10?Selection.BIG:Selection.SMALL;
+            Selection resultSelection = total > 10 ? Selection.BIG : Selection.SMALL;
             for (Bet bet : bets) {
                 bet.calculatePrice(resultSelection);
             }
