@@ -48,4 +48,13 @@ public class NormalDealerTest {
             return list;
         }
     }
+
+    @Test(expected = RuntimeException.class)
+    public void cannotSubscribeTwice(){
+        NormalDealer dealer = new NormalDealer(new SessionRandomGenerator(),100);
+        RollCollector rollCollector = new RollCollector();
+        dealer.subscribe(rollCollector);
+        dealer.subscribe(rollCollector);
+
+    }
 }

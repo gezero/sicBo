@@ -2,6 +2,7 @@ package com.ingg.exercise.sicbo.solution;
 
 import com.ingg.exercise.sicbo.model.BetFuture;
 import com.ingg.exercise.sicbo.model.Selection;
+import com.ingg.exercise.sicbo.model.exception.TableClosedException;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -115,7 +116,7 @@ public class SimpleBetAcceptorTest {
     @Test(expected = ArithmeticException.class)
     public void testBetToBig() throws Exception {
         SimpleBetAcceptor betAcceptor = new SimpleBetAcceptor("round");
-        betAcceptor.acceptBet(Selection.BIG, Integer.MAX_VALUE / 2 +1);
+        betAcceptor.acceptBet(Selection.BIG, Integer.MAX_VALUE / 2 + 1);
     }
 
     @Test
@@ -130,6 +131,37 @@ public class SimpleBetAcceptorTest {
             }
         });
         assertThat(betFuture1.getPrize(), is(0));
-        assertThat(betFuture2.getPrize(), is(Integer.MAX_VALUE -1));
+        assertThat(betFuture2.getPrize(), is(Integer.MAX_VALUE - 1));
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void cannotAcceptTwoResults() throws TableClosedException {
+        SimpleBetAcceptor betAcceptor = new SimpleBetAcceptor("round");
+        betAcceptor.finishRound(new RoundResult() {
+            @Override
+            public Iterable<Integer> getRoll() {
+                return Arrays.asList(1, 2, 3);
+            }
+        });
+        betAcceptor.finishRound(new RoundResult() {
+            @Override
+            public Iterable<Integer> getRoll() {
+                return Arrays.asList(1, 2, 3);
+            }
+        });
+
+    }
+
+
+    @Test(expected = TableClosedException.class)
+    public void cannotAcceptNewBetsAfterCaluclatedResult() throws TableClosedException {
+        SimpleBetAcceptor betAcceptor = new SimpleBetAcceptor("round");
+        betAcceptor.finishRound(new RoundResult() {
+            @Override
+            public Iterable<Integer> getRoll() {
+                return Arrays.asList(1, 2, 3);
+            }
+        });
+        betAcceptor.acceptBet(Selection.BIG, Integer.MAX_VALUE / 2);
     }
 }

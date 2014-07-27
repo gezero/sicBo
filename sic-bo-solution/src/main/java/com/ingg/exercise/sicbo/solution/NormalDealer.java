@@ -43,7 +43,7 @@ public class NormalDealer implements Dealer, Runnable {
             try {
                 Thread.sleep(timeout);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                throw new RuntimeException(e);
             }
             if (getExecute()) {
                 observer.newRoll(newRoll());

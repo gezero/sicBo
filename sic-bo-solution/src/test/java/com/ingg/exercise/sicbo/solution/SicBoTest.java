@@ -103,4 +103,19 @@ public class SicBoTest {
         RoundResult value = captor.getValue();
         assertThat(value.getRoll(), is((Iterable<Integer>) SMALL_ROLL));
     }
+
+    @Test(expected = RuntimeException.class)
+    public void cannotCloseClosedTable() {
+        sicBo.close();
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void cannotOpenOpenedTable() {
+        sicBo.open();
+        sicBo.open();
+    }
+    @Test(expected = RuntimeException.class)
+    public void hasToBeOpenToAcceptRoll() {
+        sicBo.newRoll(SMALL_ROLL);
+    }
 }

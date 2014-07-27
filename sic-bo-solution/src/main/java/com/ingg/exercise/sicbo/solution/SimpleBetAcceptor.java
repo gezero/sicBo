@@ -21,6 +21,7 @@ public class SimpleBetAcceptor implements BetAcceptor {
     boolean active = true;
     List<Bet> bets = new LinkedList<>();
     private String roundId;
+    private RoundResult result;
 
     public SimpleBetAcceptor(String roundId) {
         this.roundId = roundId;
@@ -60,6 +61,9 @@ public class SimpleBetAcceptor implements BetAcceptor {
     @Override
     public synchronized void finishRound(RoundResult result) {
         checkNotNull(result);
+        if (!active) {
+            throw new RuntimeException("Price can be calculated only once");
+        }
         Executor executor = Executors.newSingleThreadExecutor();
         executor.execute(new CalculatePrices(bets, result));
         active = false;
@@ -101,9 +105,6 @@ public class SimpleBetAcceptor implements BetAcceptor {
         }
 
         public void calculatePrice(Selection selectionResult) {
-            if (price != null) {
-                throw new RuntimeException("Price can be calculated only once");
-            }
             checkNotNull(selectionResult);
             price = selectionResult.equals(selection) ? stake * 2 : 0;
             latch.countDown();
