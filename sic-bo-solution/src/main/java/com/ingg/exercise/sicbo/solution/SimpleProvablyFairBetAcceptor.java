@@ -74,7 +74,7 @@ public class SimpleProvablyFairBetAcceptor implements ProvablyFairBetAcceptor {
      * The waiting for the price is done using the CountdownLatch. When the bet is created we do not know the price yet
      * The price is calculated once the round finishes.
      */
-    private class ProvablyFairBet implements BetFuture {
+    private class ProvablyFairBet implements ProvablyFairBetFuture {
 
         private final String roundId;
         private final Selection selection;

@@ -132,7 +132,7 @@ public class ProvablyFairSicBo implements Table, DealerObserver {
         builder.append(salt);
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            BigInteger bigInt = new BigInteger(1, builder.toString().getBytes());
+            BigInteger bigInt = new BigInteger(1, digest.digest(builder.toString().getBytes()));
             currentRoundId = bigInt.toString(16);
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException("SHA 256 was not found, now that is strange....",e);
@@ -141,4 +141,14 @@ public class ProvablyFairSicBo implements Table, DealerObserver {
     }
 
 
+    public String getCurrentRoundId() {
+        return currentRoundId;
+    }
+
+    public synchronized ProvablyFairBetFuture acceptBet(String expectedRoundId, Selection selection, int stake) throws TableClosedException {
+        if (expectedRoundId != currentRoundId){
+            throw new RuntimeException("That round already finished...");
+        }
+        return (ProvablyFairBetFuture) acceptBet(selection,stake);
+    }
 }
