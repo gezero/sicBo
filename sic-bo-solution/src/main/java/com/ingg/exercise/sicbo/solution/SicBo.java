@@ -59,12 +59,19 @@ public class SicBo implements Table, DealerObserver {
         this.dealer = new NormalDealer(generator, 5_000);
     }
 
+    /**
+     * This methods opens the casino. The return value of the subscribe method is ignored here, but is used in the
+     * provable fair variant of the solution. You can check the github if you want to:
+     * <p/>
+     * https://github.com/gezero/sicBo/tree/provably-fair
+     */
     @Override
     public synchronized void open() {
         if (open) {
             throw new RuntimeException("This table is already opened");
         }
         startNewRound();
+        //The return value of the subscribe method is ignored here, but is used in the provable fair variant
         dealer.subscribe(this);
         open = true;
     }
