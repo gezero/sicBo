@@ -6,5 +6,4 @@ package com.ingg.exercise.sicbo.solution;
 public interface RoundResult {
 
     Iterable<Integer> getRoll();
-
 }

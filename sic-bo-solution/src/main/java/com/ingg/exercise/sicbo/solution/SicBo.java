@@ -7,10 +7,6 @@ import com.ingg.exercise.sicbo.model.Table;
 import com.ingg.exercise.sicbo.model.exception.TableClosedException;
 import net.jcip.annotations.ThreadSafe;
 
-import javax.xml.transform.Result;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-
 /**
  * <p>
  * <b>Add code to this class to solve the exercise.</b>
@@ -79,13 +75,13 @@ public class SicBo implements Table, DealerObserver {
         if (betAcceptor == null) {
             throw new TableClosedException();
         }
-        return betAcceptor.acceptBet(selection,stake);
+        return betAcceptor.acceptBet(selection, stake);
     }
 
     @Override
     public void newRoll(Iterable<Integer> roll) {
         finishRound(roll);
-        resultDisplay.displayResult(currentRoundId,roll);
+        resultDisplay.displayResult(currentRoundId, roll);
         startNewRound();
     }
 
@@ -105,5 +101,7 @@ public class SicBo implements Table, DealerObserver {
         public Iterable<Integer> getRoll() {
             return roll;
         }
+
+
     }
 }
