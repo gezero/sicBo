@@ -81,7 +81,7 @@ public class SicBo implements Table, DealerObserver {
         }
         open = false;
         Iterable<Integer> lastRoll = dealer.stop();
-        betAcceptor.finishRound(new RoundResultPojo(lastRoll));
+        betAcceptor.finishRound(new ImmutableRoundResult(lastRoll));
         resultDisplay.displayResult(currentRoundId, lastRoll);
     }
 
@@ -102,59 +102,8 @@ public class SicBo implements Table, DealerObserver {
         String roundId = currentRoundId;
 
         startNewRound();
-        acceptor.finishRound(new RoundResultPojo(roll));
+        acceptor.finishRound(new ImmutableRoundResult(roll));
         resultDisplay.displayResult(roundId, roll);
     }
 
-    private class RoundResultPojo implements RoundResult {
-        private Iterable<Integer> roll;
-
-        private RoundResultPojo(Iterable<Integer> roll) {
-            this.roll = roll;
-        }
-
-        @Override
-        public Iterable<Integer> getRoll() {
-            return roll;
-        }
-
-
-    }
-
-    /**
-     * For some reason the Selection Enum does not have Triple selection... I would prefer to have this or similar
-     * method on the Selection enum and it should return the proper selection. It is prohibited to change the module
-     * where Selection is declared however...
-     *
-     * @param roll roll to be decided on
-     * @return returns true if all values in the roll are the same.
-     */
-    public static boolean isTriple(Iterable<Integer> roll) {
-        Integer number = null;
-        for (Integer integer : roll) {
-            if (number == null) {
-                number = integer;
-            }
-            if (!number.equals(integer)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    /**
-     * This method should be on the Selection enum to properly choose the selection, it is here because I am prohibited
-     * to change the module where the Selection is declared. This method should have been returning Selection.Triple,
-     * but cannot.
-     *
-     * @param roll roll to be decided on
-     * @return returns SMALL in case the sum smaller or equal to 10, returns BIG in case the sum is bigger then 10
-     */
-    public static Selection calculateSelection(Iterable<Integer> roll) {
-        int total = 0;
-        for (Integer integer : roll) {
-            total += integer;
-        }
-        return total > 10 ? Selection.BIG : Selection.SMALL;
-    }
 }

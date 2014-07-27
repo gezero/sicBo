@@ -103,7 +103,7 @@ public class SicBoTest {
         verify(betAcceptor).finishRound(captor.capture());
 
         RoundResult value = captor.getValue();
-        assertThat(value.getRoll(), is((Iterable<Integer>) SMALL_ROLL));
+        assertThat(value.toString(), is(new ImmutableRoundResult(SMALL_ROLL).toString()));
     }
 
     @Test(expected = RuntimeException.class)
@@ -120,23 +120,6 @@ public class SicBoTest {
     @Test(expected = RuntimeException.class)
     public void hasToBeOpenToAcceptRoll() {
         sicBo.newRoll(SMALL_ROLL);
-    }
-
-
-    @Test
-    public void testIsTriple() {
-        assertThat(SicBo.isTriple(SMALL_ROLL), is(false));
-        assertThat(SicBo.isTriple(BIG_ROLL), is(false));
-        assertThat(SicBo.isTriple(SMALL_TRIPLE_ROLL), is(true));
-        assertThat(SicBo.isTriple(BIG_TRIPLE_ROLL), is(true));
-    }
-
-    @Test
-    public void testCalculateSelection() {
-        assertThat(SicBo.calculateSelection(SMALL_ROLL), is(Selection.SMALL));
-        assertThat(SicBo.calculateSelection(BIG_ROLL), is(Selection.BIG));
-        assertThat(SicBo.calculateSelection(SMALL_TRIPLE_ROLL), is(Selection.SMALL));
-        assertThat(SicBo.calculateSelection(BIG_TRIPLE_ROLL), is(Selection.BIG));
     }
 
 }

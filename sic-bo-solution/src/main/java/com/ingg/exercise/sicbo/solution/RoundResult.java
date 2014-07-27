@@ -1,9 +1,10 @@
 package com.ingg.exercise.sicbo.solution;
 
+import com.ingg.exercise.sicbo.model.Selection;
+
 /**
  * @author Jiri
  */
 public interface RoundResult {
-
-    Iterable<Integer> getRoll();
+    int calculatePrice(Selection selection, int stake);
 }

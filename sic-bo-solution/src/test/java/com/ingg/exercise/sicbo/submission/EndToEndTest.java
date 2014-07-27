@@ -5,6 +5,8 @@ import com.ingg.exercise.sicbo.model.ResultDisplay;
 import com.ingg.exercise.sicbo.model.Selection;
 import com.ingg.exercise.sicbo.model.Table;
 import com.ingg.exercise.sicbo.model.exception.TableClosedException;
+import com.ingg.exercise.sicbo.solution.ImmutableRoundResult;
+import com.ingg.exercise.sicbo.solution.RoundResult;
 import com.ingg.exercise.sicbo.solution.SicBo;
 import org.junit.Test;
 
@@ -61,35 +63,28 @@ public class EndToEndTest {
 
 
     private class ResultGatherer implements ResultDisplay {
-        Map<String, Selection> map = new HashMap<>();
+        Map<String, RoundResult> map = new HashMap<>();
 
         @Override
-        public void displayResult(String roundId, Iterable<Integer> result) {
+        public void displayResult(String roundId, Iterable<Integer> roll) {
             checkNotNull(roundId);
-            checkNotNull(result);
+            checkNotNull(roll);
             if (map.get(roundId) != null) {
                 throw new RuntimeException("There was already something in map!");
             }
-            if (SicBo.isTriple(result)) {
-                System.out.println("The result of round " + roundId + " is TRIPLE.");
-                //There should be Selection.Triple inserted here, but I am not allowed to change the Selection class, which is sad...
-                map.put(roundId, null);
-            } else {
-                Selection selection = SicBo.calculateSelection(result);
-                System.out.println("The result of round " + roundId + " is " + selection + ".");
-                map.put(roundId, selection);
-
-            }
+            ImmutableRoundResult result = new ImmutableRoundResult(roll);
+            System.out.println("The result of round " + roundId + " is "+result);
+            map.put(roundId,result);
         }
 
         public boolean check(Selection selection, int stake, BetFuture betFuture) throws InterruptedException {
             //This is unfortunately to complicated because Triple constant is not in the Selection Enum
-            Selection roundSelection = map.get(betFuture.getRoundId());
-            Integer expectedPrice = roundSelection == null?0:selection.equals(roundSelection) ? stake * 2 : 0;
+            RoundResult roundResult = map.get(betFuture.getRoundId());
+            Integer expectedPrice = roundResult.calculatePrice(selection,stake);
             boolean check = expectedPrice.equals(betFuture.getPrize());
             if (!check) {
                 System.out.println("Bet for round " + betFuture.getRoundId() + "should have been different...");
-                System.out.println("Our selection: " + selection + " Round was: " + roundSelection);
+                System.out.println("Our selection: " + selection + " Round was: " + roundResult);
                 System.out.println("We got: " + betFuture.getPrize() + " Should get: " + expectedPrice);
             }
 

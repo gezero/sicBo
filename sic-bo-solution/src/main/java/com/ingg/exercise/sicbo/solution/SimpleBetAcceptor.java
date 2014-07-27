@@ -103,13 +103,8 @@ public class SimpleBetAcceptor implements BetAcceptor {
             return price;
         }
 
-        public void calculatePrice(Selection selectionResult) {
-            //This if would be only 1 line If there would be Triple selection in the Sellection Enum
-            if (selectionResult == null) {
-                price = 0;
-            } else {
-                price = selectionResult.equals(selection) ? stake * 2 : 0;
-            }
+        public void calculatePrice(RoundResult selectionResult) {
+            price = selectionResult.calculatePrice(selection,stake);
             latch.countDown();
         }
     }
@@ -129,13 +124,8 @@ public class SimpleBetAcceptor implements BetAcceptor {
 
         @Override
         public void run() {
-            Selection resultSelection = SicBo.calculateSelection(result.getRoll());
-            //This if would be not here if I would be allowed to change the Selection enum.
-            if (SicBo.isTriple(result.getRoll())) {
-                resultSelection = null;
-            }
             for (Bet bet : bets) {
-                bet.calculatePrice(resultSelection);
+                bet.calculatePrice(result);
             }
         }
     }
