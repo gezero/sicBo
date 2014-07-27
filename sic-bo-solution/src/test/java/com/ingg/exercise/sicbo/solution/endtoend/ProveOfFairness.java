@@ -1,10 +1,7 @@
 package com.ingg.exercise.sicbo.solution.endtoend;
 
-import com.ingg.exercise.sicbo.model.BetFuture;
 import com.ingg.exercise.sicbo.model.Selection;
-import com.ingg.exercise.sicbo.model.exception.TableClosedException;
 import com.ingg.exercise.sicbo.solution.ProvablyFairBetFuture;
-import com.ingg.exercise.sicbo.solution.ProvablyFairResult;
 import com.ingg.exercise.sicbo.solution.ProvablyFairSicBo;
 import org.junit.Test;
 
@@ -16,6 +13,22 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 /**
+ * The player would like to have guarantee from the e-casino that they are not picking numbers after he bets in order to
+ * rob him.
+ * <p/>
+ * The prove of fairness of the casino is done using the following steps:
+ * <ul>
+ * <li> Casino rolls before it accepts bets</li>
+ * <li> Casino creates random salt</li>
+ * <li> Casino creates a hash of a string constructed from the roll and the salt</li>
+ * <li> Player can see this string before he bets</li>
+ * <li> Player bets</li>
+ * <li> Casino decides makes the result of the game public</li>
+ * <li> Player can now check that the hash was created properly</li>
+ * </ul>
+ * <p/>
+ * In this case the currentRoundId is the hash that represents the result.
+ *
  * @author Jiri
  */
 public class ProveOfFairness {
@@ -29,7 +42,7 @@ public class ProveOfFairness {
         String currentRoundId = provablyFairSicBo.getCurrentRoundId();
 
         ProvablyFairBetFuture betFuture = provablyFairSicBo.acceptBet(currentRoundId, Selection.BIG, 10);
-        assertThat(betFuture.getRoundId(),is(currentRoundId));
+        assertThat(betFuture.getRoundId(), is(currentRoundId));
 
         provablyFairSicBo.close();
 
@@ -37,7 +50,7 @@ public class ProveOfFairness {
         String salt = betFuture.getSalt();
 
         String digest = calculateDigest(roll, salt);
-        assertThat(digest,is(betFuture.getRoundId()));
+        assertThat(digest, is(betFuture.getRoundId()));
 
     }
 
@@ -53,7 +66,7 @@ public class ProveOfFairness {
             BigInteger bigInt = new BigInteger(1, digest.digest(builder.toString().getBytes()));
             currentRoundId = bigInt.toString(16);
         } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("SHA 256 was not found, now that is strange....",e);
+            throw new RuntimeException("SHA 256 was not found, now that is strange....", e);
         }
         return currentRoundId;
     }

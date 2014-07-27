@@ -7,7 +7,6 @@ import com.ingg.exercise.sicbo.model.Table;
 import com.ingg.exercise.sicbo.model.exception.TableClosedException;
 import net.jcip.annotations.ThreadSafe;
 
-import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -27,6 +26,22 @@ import java.security.NoSuchAlgorithmException;
  * <li>settling bets, and delivering prizes to the players.</li>
  * </ul>
  * </p>
+ * <p/>
+ * The player would like to have guarantee from the e-casino that they are not picking numbers after he bets in order to
+ * rob him.
+ * <p/>
+ * The prove of fairness of the casino is done using the following steps:
+ * <ul>
+ * <li> Casino rolls before it accepts bets</li>
+ * <li> Casino creates random salt</li>
+ * <li> Casino creates a hash of a string constructed from the roll and the salt</li>
+ * <li> Player can see this string before he bets</li>
+ * <li> Player bets</li>
+ * <li> Casino decides makes the result of the game public</li>
+ * <li> Player can now check that the hash was created properly</li>
+ * </ul>
+ * <p/>
+ * In this case the currentRoundId is the hash that represents the result.
  *
  * @author Jiri Peinlich
  */
@@ -115,7 +130,7 @@ public class ProvablyFairSicBo implements Table, DealerObserver {
         }
         ProvablyFairBetAcceptor acceptor = provablyFairBetAcceptor;
         String oldRoundId = currentRoundId;
-        String oldSalt= currentSalt;
+        String oldSalt = currentSalt;
         Iterable<Integer> oldRoll = currentRoll;
         resultDisplay.displayResult(oldRoundId, oldRoll);
         startNewRound(roll);
@@ -135,7 +150,7 @@ public class ProvablyFairSicBo implements Table, DealerObserver {
             BigInteger bigInt = new BigInteger(1, digest.digest(builder.toString().getBytes()));
             currentRoundId = bigInt.toString(16);
         } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("SHA 256 was not found, now that is strange....",e);
+            throw new RuntimeException("SHA 256 was not found, now that is strange....", e);
         }
         return currentRoundId;
     }
@@ -146,9 +161,9 @@ public class ProvablyFairSicBo implements Table, DealerObserver {
     }
 
     public synchronized ProvablyFairBetFuture acceptBet(String expectedRoundId, Selection selection, int stake) throws TableClosedException {
-        if (expectedRoundId != currentRoundId){
+        if (expectedRoundId != currentRoundId) {
             throw new RuntimeException("That round already finished...");
         }
-        return (ProvablyFairBetFuture) acceptBet(selection,stake);
+        return (ProvablyFairBetFuture) acceptBet(selection, stake);
     }
 }
