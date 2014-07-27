@@ -107,18 +107,18 @@ public class SicBoTest {
     }
 
     @Test(expected = RuntimeException.class)
-    public void cannotCloseClosedTable() {
+    public void testCannotCloseClosedTable() {
         sicBo.close();
     }
 
     @Test(expected = RuntimeException.class)
-    public void cannotOpenOpenedTable() {
+    public void testCannotOpenOpenedTable() {
         sicBo.open();
         sicBo.open();
     }
 
     @Test(expected = RuntimeException.class)
-    public void hasToBeOpenToAcceptRoll() {
+    public void testHasToBeOpenToAcceptRoll() {
         sicBo.newRoll(SMALL_ROLL);
     }
 

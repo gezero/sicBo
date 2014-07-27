@@ -39,7 +39,7 @@ public class ImmutableRoundResultTest {
     }
 
     @Test
-    public void all_combinations_test() throws Exception {
+    public void testAllCombinations() throws Exception {
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
                 for (int k = 0; k < 8; k++) {

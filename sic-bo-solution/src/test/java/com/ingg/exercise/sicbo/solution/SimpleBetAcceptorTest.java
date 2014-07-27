@@ -72,7 +72,7 @@ public class SimpleBetAcceptorTest {
 
 
     @Test(expected = RuntimeException.class)
-    public void cannotAcceptTwoResults() throws TableClosedException {
+    public void testCannotAcceptTwoResults() throws TableClosedException {
         SimpleBetAcceptor betAcceptor = new SimpleBetAcceptor("round");
         betAcceptor.finishRound(new ImmutableRoundResult(Arrays.asList(1, 2, 3)));
         betAcceptor.finishRound(new ImmutableRoundResult(Arrays.asList(1, 2, 3)));
@@ -81,7 +81,7 @@ public class SimpleBetAcceptorTest {
 
 
     @Test(expected = TableClosedException.class)
-    public void cannotAcceptNewBetsAfterCaluclatedResult() throws TableClosedException {
+    public void testCannotAcceptNewBetsAfterCaluclatedResult() throws TableClosedException {
         SimpleBetAcceptor betAcceptor = new SimpleBetAcceptor("round");
         betAcceptor.finishRound(new ImmutableRoundResult(Arrays.asList(1, 2, 3)));
         betAcceptor.acceptBet(Selection.BIG, Integer.MAX_VALUE / 2);

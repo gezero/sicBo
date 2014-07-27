@@ -1,4 +1,4 @@
-package com.ingg.exercise.sicbo.submission;
+package com.ingg.exercise.sicbo.solution.endtoend;
 
 import com.ingg.exercise.sicbo.model.BetFuture;
 import com.ingg.exercise.sicbo.model.Selection;

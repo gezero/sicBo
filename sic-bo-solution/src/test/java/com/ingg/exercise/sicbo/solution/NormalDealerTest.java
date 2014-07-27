@@ -51,7 +51,7 @@ public class NormalDealerTest {
     }
 
     @Test(expected = RuntimeException.class)
-    public void cannotSubscribeTwice(){
+    public void testCannotSubscribeTwice(){
         NormalDealer dealer = new NormalDealer(new SessionRandomGenerator(),100);
         RollCollector rollCollector = new RollCollector();
         dealer.subscribe(rollCollector);

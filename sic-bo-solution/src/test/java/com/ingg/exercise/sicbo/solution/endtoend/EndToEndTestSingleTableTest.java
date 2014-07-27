@@ -1,4 +1,4 @@
-package com.ingg.exercise.sicbo.submission;
+package com.ingg.exercise.sicbo.solution.endtoend;
 
 import com.ingg.exercise.sicbo.model.Table;
 import com.ingg.exercise.sicbo.solution.SicBo;
@@ -15,10 +15,10 @@ import static org.junit.Assert.assertThat;
 /**
  * @author Jiri
  */
-public class EndToEndTestSingleTable {
+public class EndToEndTestSingleTableTest {
 
     @Test
-    public void endToEndTest() throws InterruptedException {
+    public void testEndToEndTest() throws InterruptedException {
         ResultGatherer resultGatherer = new ResultGatherer();
         Table table = new SicBo(resultGatherer);
 

@@ -1,4 +1,4 @@
-package com.ingg.exercise.sicbo.submission;
+package com.ingg.exercise.sicbo.solution.endtoend;
 
 import com.ingg.exercise.sicbo.model.Table;
 import com.ingg.exercise.sicbo.solution.SicBo;
@@ -14,11 +14,11 @@ import java.util.concurrent.Executors;
 /**
  * @author Jiri
  */
-public class EndToEndMultipleTables {
+public class EndToEndMultipleTablesTest {
 
     @Test
-    public void endToEndTest() throws InterruptedException {
-        int tables = 100;
+    public void testEndToEnd() throws InterruptedException {
+        int tables = 50;
         CountDownLatch latch = new CountDownLatch(tables);
         SecureRandom random = new SecureRandom();
         Executor executor = Executors.newFixedThreadPool(10);
