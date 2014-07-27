@@ -9,3 +9,16 @@ There are two branches here. Master is trying to create a solution as was asked 
 The provably-fair solution is trying to solve problem, where player might suspect the e-casino cheating and picking the result depending on how he bets and making him lose more than how much he would lose with normal distribution of results. 
 
 Note that I am not an owner of the whole code. I am owner of the solution module. Please read the readme.pdf for details. 
+
+The prove of fairness of the casino is done using the following steps:
+
+* Casino rolls before it accepts bets
+* Casino creates random salt
+* Casino creates a hash of a string constructed from the roll and the salt
+* Player can see this string before he bets
+* Player bets
+* Casino decides makes the result of the game public
+* Player can now check that the hash was created properly
+* In this case the currentRoundId is the hash that represents the result.
+
+There is one Test class that is testing the fairness of the sicBo .
