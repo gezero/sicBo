@@ -41,11 +41,10 @@ public class EndToEndTest {
         }
 
         Thread.sleep(1000);
-        System.out.println("Opening table");
+        System.out.println("Opening table for 60 seconds");
         table.open();
 
-        Thread.sleep(50_000);
-//        Thread.sleep(7_000);
+        Thread.sleep(60_000);
 
         table.close();
         System.out.println("Table closed");
