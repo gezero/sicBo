@@ -54,7 +54,7 @@ public class EndToEndTest {
             totalBets += player.checkBets(resultGatherer);
         }
 
-        System.out.println("There was "+ totalBets +" placed bets by "+ playerList.size()+ " players..");
+        System.out.println("There was " + totalBets + " placed bets by " + playerList.size() + " players..");
 
 
     }
@@ -70,22 +70,27 @@ public class EndToEndTest {
             if (map.get(roundId) != null) {
                 throw new RuntimeException("There was already something in map!");
             }
-            int total = 0;
-            for (Integer integer : result) {
-                total += integer;
+            if (SicBo.isTriple(result)) {
+                System.out.println("The result of round " + roundId + " is TRIPLE.");
+                //There should be Selection.Triple inserted here, but I am not allowed to change the Selection class, which is sad...
+                map.put(roundId, null);
+            } else {
+                Selection selection = SicBo.calculateSelection(result);
+                System.out.println("The result of round " + roundId + " is " + selection + ".");
+                map.put(roundId, selection);
+
             }
-            Selection selection = total > 10 ? Selection.BIG : Selection.SMALL;
-            System.out.println("Round " + roundId + " finished with total of " + total + " meaning selection is " + selection);
-            map.put(roundId, selection);
         }
 
         public boolean check(Selection selection, int stake, BetFuture betFuture) throws InterruptedException {
-            Integer expectedPrice = selection.equals(map.get(betFuture.getRoundId())) ? stake * 2 : 0;
+            //This is unfortunately to complicated because Triple constant is not in the Selection Enum
+            Selection roundSelection = map.get(betFuture.getRoundId());
+            Integer expectedPrice = roundSelection == null?0:selection.equals(roundSelection) ? stake * 2 : 0;
             boolean check = expectedPrice.equals(betFuture.getPrize());
             if (!check) {
                 System.out.println("Bet for round " + betFuture.getRoundId() + "should have been different...");
-                System.out.println("Our selection: " + selection + " Round was: " + map.get(betFuture.getRoundId()));
-                System.out.println("We got: "+ betFuture.getPrize() +" Should get: "+ expectedPrice);
+                System.out.println("Our selection: " + selection + " Round was: " + roundSelection);
+                System.out.println("We got: " + betFuture.getPrize() + " Should get: " + expectedPrice);
             }
 
             return check;
@@ -132,7 +137,7 @@ public class EndToEndTest {
             for (MyBet bet : bets) {
                 correct += resultGatherer.check(bet.getSelection(), bet.getStake(), bet.getBetFuture()) ? 1 : 0;
             }
-            assertThat(correct,is(bets.size()));
+            assertThat(correct, is(bets.size()));
             return correct;
         }
 

@@ -20,22 +20,24 @@ import static org.mockito.Mockito.*;
 
 public class SicBoTest {
 
-    private final List<Integer> BIG_ROLL = Arrays.asList(5, 5, 5);
+    private final List<Integer> SMALL_ROLL = Arrays.asList(1, 2, 3);
+    private final List<Integer> BIG_ROLL = Arrays.asList(4, 5, 5);
+    private final List<Integer> SMALL_TRIPLE_ROLL = Arrays.asList(2, 2, 2);
+    private final List<Integer> BIG_TRIPLE_ROLL = Arrays.asList(5, 5, 5);
+
     @InjectMocks
     SicBo sicBo;
-
     @Mock
     Dealer dealer;
     @Mock
     RandomStringGenerator randomStringGenerator;
     @Mock
     BetAcceptorFactory betAcceptorFactory;
+
     @Mock
     BetAcceptor betAcceptor;
-
     @Spy
     ResultDisplay consoleResultDisplay = new ConsoleResultDisplay();
-    private final List<Integer> SMALL_ROLL = Arrays.asList(1, 2, 3);
     @Captor
     private ArgumentCaptor<RoundResult> captor;
 
@@ -114,8 +116,27 @@ public class SicBoTest {
         sicBo.open();
         sicBo.open();
     }
+
     @Test(expected = RuntimeException.class)
     public void hasToBeOpenToAcceptRoll() {
         sicBo.newRoll(SMALL_ROLL);
     }
+
+
+    @Test
+    public void testIsTriple() {
+        assertThat(SicBo.isTriple(SMALL_ROLL), is(false));
+        assertThat(SicBo.isTriple(BIG_ROLL), is(false));
+        assertThat(SicBo.isTriple(SMALL_TRIPLE_ROLL), is(true));
+        assertThat(SicBo.isTriple(BIG_TRIPLE_ROLL), is(true));
+    }
+
+    @Test
+    public void testCalculateSelection() {
+        assertThat(SicBo.calculateSelection(SMALL_ROLL), is(Selection.SMALL));
+        assertThat(SicBo.calculateSelection(BIG_ROLL), is(Selection.BIG));
+        assertThat(SicBo.calculateSelection(SMALL_TRIPLE_ROLL), is(Selection.SMALL));
+        assertThat(SicBo.calculateSelection(BIG_TRIPLE_ROLL), is(Selection.BIG));
+    }
+
 }

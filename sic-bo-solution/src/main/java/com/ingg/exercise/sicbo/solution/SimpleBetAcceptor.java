@@ -21,7 +21,6 @@ public class SimpleBetAcceptor implements BetAcceptor {
     boolean active = true;
     List<Bet> bets = new LinkedList<>();
     private String roundId;
-    private RoundResult result;
 
     public SimpleBetAcceptor(String roundId) {
         this.roundId = roundId;
@@ -33,7 +32,7 @@ public class SimpleBetAcceptor implements BetAcceptor {
      *
      * @param selection Player has to pick one of the selection options
      * @param stake     Amount of money that player can bet
-     * @return
+     * @return BetFuture object that will block on reading the price attribute unless the round has already finished.
      * @throws TableClosedException
      */
     @Override
@@ -105,8 +104,12 @@ public class SimpleBetAcceptor implements BetAcceptor {
         }
 
         public void calculatePrice(Selection selectionResult) {
-            checkNotNull(selectionResult);
-            price = selectionResult.equals(selection) ? stake * 2 : 0;
+            //This if would be only 1 line If there would be Triple selection in the Sellection Enum
+            if (selectionResult == null) {
+                price = 0;
+            } else {
+                price = selectionResult.equals(selection) ? stake * 2 : 0;
+            }
             latch.countDown();
         }
     }
@@ -126,11 +129,11 @@ public class SimpleBetAcceptor implements BetAcceptor {
 
         @Override
         public void run() {
-            int total = 0;
-            for (Integer integer : result.getRoll()) {
-                total += integer;
+            Selection resultSelection = SicBo.calculateSelection(result.getRoll());
+            //This if would be not here if I would be allowed to change the Selection enum.
+            if (SicBo.isTriple(result.getRoll())) {
+                resultSelection = null;
             }
-            Selection resultSelection = total > 10 ? Selection.BIG : Selection.SMALL;
             for (Bet bet : bets) {
                 bet.calculatePrice(resultSelection);
             }
