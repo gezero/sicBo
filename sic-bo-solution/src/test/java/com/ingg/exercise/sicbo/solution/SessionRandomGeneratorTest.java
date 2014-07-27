@@ -15,7 +15,8 @@ public class SessionRandomGeneratorTest {
     @Test
     public void testSomeGeneration() throws Exception {
         for (int i = 0; i < 1000; i++) {
-            randomGenerator.generateInteger();
+            int i1 = randomGenerator.generateInteger(6);
+            assertThat(i1, is(lessThan(6)));
             String s = randomGenerator.generateString();
             assertThat(s,is(notNullValue()));
             assertThat(s.length(),is(greaterThan(0)));

@@ -14,7 +14,6 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
@@ -44,16 +43,18 @@ public class EndToEndTest {
         table.open();
 
         Thread.sleep(50_000);
-//        Thread.sleep(5_000);
-
+//        Thread.sleep(7_000);
 
         table.close();
         System.out.println("Table closed");
         Thread.sleep(1000);
 
+        int totalBets = 0;
         for (Player player : playerList) {
-            player.checkBets(resultGatherer);
+            totalBets += player.checkBets(resultGatherer);
         }
+
+        System.out.println("There was "+ totalBets +" placed bets by "+ playerList.size()+ " players..");
 
 
     }
@@ -69,17 +70,25 @@ public class EndToEndTest {
             if (map.get(roundId) != null) {
                 throw new RuntimeException("There was already something in map!");
             }
-            System.out.println("Round " + roundId + " finished...");
             int total = 0;
             for (Integer integer : result) {
                 total += integer;
             }
-            map.put(roundId, total > 10 ? Selection.BIG : Selection.SMALL);
+            Selection selection = total > 10 ? Selection.BIG : Selection.SMALL;
+            System.out.println("Round " + roundId + " finished with total of " + total + " meaning selection is " + selection);
+            map.put(roundId, selection);
         }
 
         public boolean check(Selection selection, int stake, BetFuture betFuture) throws InterruptedException {
             Integer expectedPrice = selection.equals(map.get(betFuture.getRoundId())) ? stake * 2 : 0;
-            return expectedPrice.equals(betFuture.getPrize());
+            boolean check = expectedPrice.equals(betFuture.getPrize());
+            if (!check) {
+                System.out.println("Bet for round " + betFuture.getRoundId() + "should have been different...");
+                System.out.println("Our selection: " + selection + " Round was: " + map.get(betFuture.getRoundId()));
+                System.out.println("We got: "+ betFuture.getPrize() +" Should get: "+ expectedPrice);
+            }
+
+            return check;
         }
     }
 
@@ -98,18 +107,15 @@ public class EndToEndTest {
 
         @Override
         public void run() {
-            System.out.println("Player " + id + " initialized");
             while (true) {
                 Selection selection = random.nextInt(2) == 0 ? Selection.BIG : Selection.SMALL;
                 int stake = random.nextInt(500);
                 try {
                     BetFuture betFuture = table.acceptBet(selection, stake);
                     betted = true;
-                    System.out.println("Player " + id + " betting...");
                     bets.add(new MyBet(selection, stake, betFuture));
                 } catch (TableClosedException e) {
                     if (betted) {
-                        System.out.println("Player " + id + " is not playing anymore");
                         return;
                     }
                 }
@@ -121,13 +127,13 @@ public class EndToEndTest {
             }
         }
 
-        public void checkBets(ResultGatherer resultGatherer) throws InterruptedException {
+        public int checkBets(ResultGatherer resultGatherer) throws InterruptedException {
             int correct = 0;
             for (MyBet bet : bets) {
-                boolean check = resultGatherer.check(bet.getSelection(), bet.getStake(), bet.getBetFuture());
-                correct += check?1:0;
+                correct += resultGatherer.check(bet.getSelection(), bet.getStake(), bet.getBetFuture()) ? 1 : 0;
             }
-            System.out.println("Player " +id +" had " + correct+ " correct from total of " + bets.size());
+            assertThat(correct,is(bets.size()));
+            return correct;
         }
 
         private class MyBet {

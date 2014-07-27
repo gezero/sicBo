@@ -15,7 +15,7 @@ public class SessionRandomGenerator implements RandomStringGenerator, RandomInte
     }
 
     @Override
-    public int generateInteger() {
-        return random.nextInt();
+    public int generateInteger(int i) {
+        return random.nextInt(i);
     }
 }

@@ -55,9 +55,9 @@ public class NormalDealer implements Dealer, Runnable {
 
     private synchronized Iterable<Integer> newRoll() {
         List<Integer> result = new ArrayList<>();
-        result.add(integerGenerator.generateInteger());
-        result.add(integerGenerator.generateInteger());
-        result.add(integerGenerator.generateInteger());
+        result.add(integerGenerator.generateInteger(6)+1);
+        result.add(integerGenerator.generateInteger(6)+1);
+        result.add(integerGenerator.generateInteger(6)+1);
         return result;
     }
 

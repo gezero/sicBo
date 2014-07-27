@@ -32,6 +32,7 @@ public class SicBo implements Table, DealerObserver {
     private Dealer dealer;
     private BetAcceptorFactory betAcceptorFactory;
 
+    boolean open = false;
     private BetAcceptor betAcceptor;
     private RandomStringGenerator randomStringGenerator;
     private String currentRoundId;
@@ -58,8 +59,12 @@ public class SicBo implements Table, DealerObserver {
 
     @Override
     public synchronized void open() {
+        if (open){
+            throw new RuntimeException("This table is already opened");
+        }
         dealer.subscribe(this);
         startNewRound();
+        open = true;
     }
 
     private void startNewRound() {
@@ -69,13 +74,18 @@ public class SicBo implements Table, DealerObserver {
 
     @Override
     public synchronized void close() {
+        if (!open){
+            throw new RuntimeException("You need to open the table first");
+        }
+        open = false;
         Iterable<Integer> lastRoll = dealer.stop();
-        finishRound(lastRoll);
+        betAcceptor.finishRound(new RoundResultPojo(lastRoll));
+        resultDisplay.displayResult(currentRoundId, lastRoll);
     }
 
     @Override
     public synchronized BetFuture acceptBet(Selection selection, Integer stake) throws TableClosedException {
-        if (betAcceptor == null) {
+        if (! open) {
             throw new TableClosedException();
         }
         return betAcceptor.acceptBet(selection, stake);
@@ -83,14 +93,15 @@ public class SicBo implements Table, DealerObserver {
 
     @Override
     public synchronized void newRoll(Iterable<Integer> roll) {
-        finishRound(roll);
-        resultDisplay.displayResult(currentRoundId, roll);
-        startNewRound();
-    }
+        if (!open){
+            throw new RuntimeException("Cannot accept rolls when not open");
+        }
+        BetAcceptor acceptor = betAcceptor;
+        String roundId = currentRoundId;
 
-    private void finishRound(Iterable<Integer> roll) {
-        RoundResult result = new RoundResultPojo(roll);
-        betAcceptor.finishRound(result);
+        startNewRound();
+        acceptor.finishRound(new RoundResultPojo(roll));
+        resultDisplay.displayResult(roundId, roll);
     }
 
     private class RoundResultPojo implements RoundResult {
