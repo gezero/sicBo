@@ -7,6 +7,11 @@ import com.ingg.exercise.sicbo.model.Table;
 import com.ingg.exercise.sicbo.model.exception.TableClosedException;
 import net.jcip.annotations.ThreadSafe;
 
+import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
 /**
  * <p>
  * <b>Add code to this class to solve the exercise.</b>
@@ -26,23 +31,25 @@ import net.jcip.annotations.ThreadSafe;
  * @author Jiri Peinlich
  */
 @ThreadSafe
-public class SicBo implements Table, DealerObserver {
+public class ProvablyFairSicBo implements Table, DealerObserver {
 
     private final ResultDisplay resultDisplay;
     private Dealer dealer;
-    private BetAcceptorFactory betAcceptorFactory;
+    private ProvablyFairBetAcceptorFactory provablyFairBetAcceptorFactory;
 
     boolean open = false;
-    private BetAcceptor betAcceptor;
+    private ProvablyFairBetAcceptor provablyFairBetAcceptor;
     private RandomStringGenerator randomStringGenerator;
+    private String currentSalt;
     private String currentRoundId;
+    private Iterable<Integer> currentRoll;
 
 
     @SuppressWarnings("UnusedDeclaration") //This method is used by Mockito when injecting mocks
-    public SicBo(ResultDisplay resultDisplay, Dealer dealer, BetAcceptorFactory betAcceptorFactory, RandomStringGenerator randomStringGenerator) {
+    public ProvablyFairSicBo(ResultDisplay resultDisplay, Dealer dealer, ProvablyFairBetAcceptorFactory provablyFairBetAcceptorFactory, RandomStringGenerator randomStringGenerator) {
         this.resultDisplay = resultDisplay;
         this.dealer = dealer;
-        this.betAcceptorFactory = betAcceptorFactory;
+        this.provablyFairBetAcceptorFactory = provablyFairBetAcceptorFactory;
         this.randomStringGenerator = randomStringGenerator;
     }
 
@@ -51,11 +58,11 @@ public class SicBo implements Table, DealerObserver {
      * The following code I would rather put into configuration or autowiring of injecting dependencies. The
      * requirements however expect that this constructor exists and the evaluation program probably calls it.
      */
-    public SicBo(ResultDisplay resultDisplay) {
+    public ProvablyFairSicBo(ResultDisplay resultDisplay) {
         this.resultDisplay = resultDisplay;
         SessionRandomGenerator generator = new SessionRandomGenerator();
         this.randomStringGenerator = generator;
-        this.betAcceptorFactory = new SimpleBetAcceptorFactory();
+        this.provablyFairBetAcceptorFactory = new SimpleProvablyFairProvablyFairBetAcceptorFactory();
         this.dealer = new NormalDealer(generator, 5_000);
     }
 
@@ -70,15 +77,16 @@ public class SicBo implements Table, DealerObserver {
         if (open) {
             throw new RuntimeException("This table is already opened");
         }
-        startNewRound();
-        //The return value of the subscribe method is ignored here, but is used in the provable fair variant
-        dealer.subscribe(this);
+        Iterable<Integer> firstRoll = dealer.subscribe(this);
+        startNewRound(firstRoll);
         open = true;
     }
 
-    private void startNewRound() {
-        currentRoundId = randomStringGenerator.generateString();
-        betAcceptor = betAcceptorFactory.createNewAcceptor(currentRoundId);
+    private void startNewRound(Iterable<Integer> roll) {
+        currentSalt = randomStringGenerator.generateString();
+        currentRoll = roll;
+        currentRoundId = createRoundId(roll, currentSalt);
+        provablyFairBetAcceptor = provablyFairBetAcceptorFactory.createNewAcceptor(currentRoundId);
     }
 
     @Override
@@ -87,9 +95,9 @@ public class SicBo implements Table, DealerObserver {
             throw new RuntimeException("You need to open the table first");
         }
         open = false;
-        Iterable<Integer> lastRoll = dealer.stop();
-        betAcceptor.finishRound(new ImmutableRoundResult(lastRoll));
-        resultDisplay.displayResult(currentRoundId, lastRoll);
+        dealer.stop();
+        resultDisplay.displayResult(currentRoundId, currentRoll);
+        provablyFairBetAcceptor.finishRound(new ImmutableProvablyFairResult(currentRoll, currentSalt));
     }
 
     @Override
@@ -97,7 +105,7 @@ public class SicBo implements Table, DealerObserver {
         if (!open) {
             throw new TableClosedException();
         }
-        return betAcceptor.acceptBet(selection, stake);
+        return provablyFairBetAcceptor.acceptBet(selection, stake);
     }
 
     @Override
@@ -105,12 +113,32 @@ public class SicBo implements Table, DealerObserver {
         if (!open) {
             throw new RuntimeException("Cannot accept rolls when not open");
         }
-        BetAcceptor acceptor = betAcceptor;
-        String roundId = currentRoundId;
-
-        startNewRound();
-        acceptor.finishRound(new ImmutableRoundResult(roll));
-        resultDisplay.displayResult(roundId, roll);
+        ProvablyFairBetAcceptor acceptor = provablyFairBetAcceptor;
+        String oldRoundId = currentRoundId;
+        String oldSalt= currentSalt;
+        Iterable<Integer> oldRoll = currentRoll;
+        resultDisplay.displayResult(oldRoundId, oldRoll);
+        startNewRound(roll);
+        acceptor.finishRound(new ImmutableProvablyFairResult(oldRoll, oldSalt));
     }
+
+
+    private static String createRoundId(Iterable<Integer> roll, String salt) {
+        StringBuilder builder = new StringBuilder();
+        for (Integer integer : roll) {
+            builder.append(integer);
+        }
+        String currentRoundId;
+        builder.append(salt);
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            BigInteger bigInt = new BigInteger(1, builder.toString().getBytes());
+            currentRoundId = bigInt.toString(16);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("SHA 256 was not found, now that is strange....",e);
+        }
+        return currentRoundId;
+    }
+
 
 }

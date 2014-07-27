@@ -1,17 +1,14 @@
 package com.ingg.exercise.sicbo.solution.endtoend;
 
 import com.ingg.exercise.sicbo.model.Table;
-import com.ingg.exercise.sicbo.solution.SicBo;
+import com.ingg.exercise.sicbo.solution.ProvablyFairSicBo;
 import org.junit.Test;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
-import static com.google.common.base.Preconditions.checkNotNull;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
 
 /**
  * @author Jiri
@@ -21,7 +18,7 @@ public class EndToEndTestSingleTableTest {
     @Test
     public void testEndToEndTest() throws InterruptedException {
         ResultGatherer resultGatherer = new ResultGatherer();
-        Table table = new SicBo(resultGatherer);
+        Table table = new ProvablyFairSicBo(resultGatherer);
 
         List<Player> playerList = new ArrayList<>();
         for (int i = 0; i < 100; i++) {

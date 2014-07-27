@@ -5,11 +5,15 @@ import com.ingg.exercise.sicbo.model.Selection;
 /**
  * @author Jiri
  */
-public class ImmutableRoundResult implements RoundResult {
+public class ImmutableProvablyFairResult implements ProvablyFairResult {
     private final Selection selection;
     private final boolean isTriple;
+    private final Iterable<Integer> roll;
+    private String salt;
 
-    public ImmutableRoundResult(Iterable<Integer> roll) {
+    public ImmutableProvablyFairResult(Iterable<Integer> roll, String salt) {
+        this.roll = roll;
+        this.salt = salt;
         selection = calculateSelection(roll);
         isTriple = isTriple(roll);
     }
@@ -53,5 +57,15 @@ public class ImmutableRoundResult implements RoundResult {
             return "TRIPLE";
         }
         return selection.toString();
+    }
+
+    @Override
+    public Iterable<Integer> getRoll() {
+        return roll;
+    }
+
+    @Override
+    public String getSalt() {
+        return salt;
     }
 }

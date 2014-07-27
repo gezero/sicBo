@@ -8,11 +8,11 @@ import java.util.Arrays;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
-public class ImmutableRoundResultTest {
-    ImmutableRoundResult small = new ImmutableRoundResult(Arrays.asList(1, 2, 3));
-    ImmutableRoundResult small_tripple = new ImmutableRoundResult(Arrays.asList(2, 2, 2));
-    ImmutableRoundResult big = new ImmutableRoundResult(Arrays.asList(4, 5, 5));
-    ImmutableRoundResult big_triple = new ImmutableRoundResult(Arrays.asList(6, 6, 6));
+public class ImmutableProvablyFairResultTest {
+    ImmutableProvablyFairResult small = new ImmutableProvablyFairResult(Arrays.asList(1, 2, 3), null);
+    ImmutableProvablyFairResult small_tripple = new ImmutableProvablyFairResult(Arrays.asList(2, 2, 2), null);
+    ImmutableProvablyFairResult big = new ImmutableProvablyFairResult(Arrays.asList(4, 5, 5), null);
+    ImmutableProvablyFairResult big_triple = new ImmutableProvablyFairResult(Arrays.asList(6, 6, 6), null);
 
     @Test
     public void testCalculatePrice() throws Exception {
@@ -44,9 +44,9 @@ public class ImmutableRoundResultTest {
             for (int j = 0; j < 8; j++) {
                 for (int k = 0; k < 8; k++) {
 
-                    ImmutableRoundResult result = null;
+                    ImmutableProvablyFairResult result = null;
                     try {
-                        result = new ImmutableRoundResult(Arrays.asList(i, j, k));
+                        result = new ImmutableProvablyFairResult(Arrays.asList(i, j, k), null);
                         assertThat(i >= 1 && i <= 6 && j >= 1 && j <= 6 && k >= 1 && k <= 6, is(true));
                         if (i == j && i == k) {
                             assertThat(result.toString(), is("TRIPLE"));

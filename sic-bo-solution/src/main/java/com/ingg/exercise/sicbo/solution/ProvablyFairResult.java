@@ -5,6 +5,8 @@ import com.ingg.exercise.sicbo.model.Selection;
 /**
  * @author Jiri
  */
-public interface RoundResult {
+public interface ProvablyFairResult {
     int calculatePrice(Selection selection, int stake);
+    Iterable<Integer> getRoll();
+    String getSalt();
 }

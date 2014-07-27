@@ -26,25 +26,25 @@ public class SicBoTest {
     private final List<Integer> BIG_TRIPLE_ROLL = Arrays.asList(5, 5, 5);
 
     @InjectMocks
-    SicBo sicBo;
+    ProvablyFairSicBo sicBo;
     @Mock
     Dealer dealer;
     @Mock
     RandomStringGenerator randomStringGenerator;
     @Mock
-    BetAcceptorFactory betAcceptorFactory;
+    ProvablyFairBetAcceptorFactory provablyFairBetAcceptorFactory;
 
     @Mock
-    BetAcceptor betAcceptor;
+    ProvablyFairBetAcceptor provablyFairBetAcceptor;
     @Spy
     ResultDisplay consoleResultDisplay = new ConsoleResultDisplay();
     @Captor
-    private ArgumentCaptor<RoundResult> captor;
+    private ArgumentCaptor<ProvablyFairResult> captor;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        when(betAcceptorFactory.createNewAcceptor(any(String.class))).thenReturn(betAcceptor);
+        when(provablyFairBetAcceptorFactory.createNewAcceptor(any(String.class))).thenReturn(provablyFairBetAcceptor);
     }
 
     @Test(expected = TableClosedException.class)
@@ -71,8 +71,8 @@ public class SicBoTest {
         } catch (TableClosedException e) {
             throw new RuntimeException("There should not have been any exceptions, but there was one", e);
         }
-        verify(betAcceptor).finishRound(any(RoundResult.class));
-        when(betAcceptor.acceptBet(Selection.BIG, 10)).thenThrow(new TableClosedException());
+        verify(provablyFairBetAcceptor).finishRound(any(ProvablyFairResult.class));
+        when(provablyFairBetAcceptor.acceptBet(Selection.BIG, 10)).thenThrow(new TableClosedException());
         sicBo.acceptBet(Selection.BIG, 10);
     }
 
@@ -82,7 +82,7 @@ public class SicBoTest {
         sicBo.open();
 
         BetFuture bet = mock(BetFuture.class);
-        when(betAcceptor.acceptBet(Selection.SMALL, 10)).thenReturn(bet);
+        when(provablyFairBetAcceptor.acceptBet(Selection.SMALL, 10)).thenReturn(bet);
         BetFuture betFuture = sicBo.acceptBet(Selection.SMALL, 10);
         assertThat(betFuture, is(bet));
     }
@@ -100,10 +100,10 @@ public class SicBoTest {
         when(dealer.subscribe(sicBo)).thenReturn(BIG_ROLL);
         sicBo.open();
         sicBo.newRoll(SMALL_ROLL);
-        verify(betAcceptor).finishRound(captor.capture());
+        verify(provablyFairBetAcceptor).finishRound(captor.capture());
 
-        RoundResult value = captor.getValue();
-        assertThat(value.toString(), is(new ImmutableRoundResult(SMALL_ROLL).toString()));
+        ProvablyFairResult value = captor.getValue();
+        assertThat(value.toString(), is(new ImmutableProvablyFairResult(BIG_ROLL, null).toString()));
     }
 
     @Test(expected = RuntimeException.class)

@@ -1,7 +1,7 @@
 package com.ingg.exercise.sicbo.solution.endtoend;
 
 import com.ingg.exercise.sicbo.model.Table;
-import com.ingg.exercise.sicbo.solution.SicBo;
+import com.ingg.exercise.sicbo.solution.ProvablyFairSicBo;
 import org.junit.Test;
 
 import java.security.SecureRandom;
@@ -51,7 +51,7 @@ public class EndToEndMultipleTablesTest {
 
         private void runTest() throws InterruptedException {
             ResultGatherer resultGatherer = new ResultGatherer();
-            Table table = new SicBo(resultGatherer);
+            Table table = new ProvablyFairSicBo(resultGatherer);
 
             List<Player> playerList = new ArrayList<>();
             for (int i = 0; i < 20; i++) {

@@ -18,12 +18,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Jiri
  */
-public class SimpleBetAcceptor implements BetAcceptor {
+public class SimpleProvablyFairBetAcceptor implements ProvablyFairBetAcceptor {
     boolean active = true;
-    List<Bet> bets = new LinkedList<>();
+    List<ProvablyFairBet> provablyFairBets = new LinkedList<>();
     private String roundId;
 
-    public SimpleBetAcceptor(String roundId) {
+    public SimpleProvablyFairBetAcceptor(String roundId) {
         this.roundId = roundId;
     }
 
@@ -47,9 +47,9 @@ public class SimpleBetAcceptor implements BetAcceptor {
             throw new ArithmeticException("Bet is to high, If you would win, we would not be able to calculate how much. " +
                     "Try to split the bet into few smaller ones...");
         }
-        Bet bet = new Bet(roundId, selection, stake);
-        bets.add(bet);
-        return bet;
+        ProvablyFairBet provablyFairBet = new ProvablyFairBet(roundId, selection, stake);
+        provablyFairBets.add(provablyFairBet);
+        return provablyFairBet;
     }
 
     /**
@@ -59,13 +59,13 @@ public class SimpleBetAcceptor implements BetAcceptor {
      * @param result result of a dealers roll.
      */
     @Override
-    public synchronized void finishRound(RoundResult result) {
+    public synchronized void finishRound(ProvablyFairResult result) {
         checkNotNull(result);
         if (!active) {
             throw new RuntimeException("Price can be calculated only once");
         }
         ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.execute(new CalculatePrices(bets, result));
+        executor.execute(new CalculatePrices(provablyFairBets, result));
         executor.shutdown();
         active = false;
     }
@@ -74,15 +74,17 @@ public class SimpleBetAcceptor implements BetAcceptor {
      * The waiting for the price is done using the CountdownLatch. When the bet is created we do not know the price yet
      * The price is calculated once the round finishes.
      */
-    private class Bet implements BetFuture {
+    private class ProvablyFairBet implements BetFuture {
 
         private final String roundId;
         private final Selection selection;
         private final Integer stake;
         private Integer price = null;
         private final CountDownLatch latch = new CountDownLatch(1);
+        private String salt;
+        private Iterable<Integer> roll;
 
-        private Bet(String roundId, Selection selection, Integer stake) {
+        private ProvablyFairBet(String roundId, Selection selection, Integer stake) {
             this.roundId = roundId;
             this.selection = selection;
             this.stake = stake;
@@ -105,8 +107,24 @@ public class SimpleBetAcceptor implements BetAcceptor {
             return price;
         }
 
-        public void calculatePrice(RoundResult selectionResult) {
+        public String getSalt() throws InterruptedException {
+            latch.await();
+            return salt;
+        }
+
+        public Iterable<Integer> getRoll() throws InterruptedException {
+            latch.await();
+            return roll;
+        }
+
+        public void setRoll(Iterable<Integer> roll) {
+            this.roll = roll;
+        }
+
+        public void calculatePrice(ProvablyFairResult selectionResult) {
             price = selectionResult.calculatePrice(selection,stake);
+            salt = selectionResult.getSalt();
+            roll = selectionResult.getRoll();
             latch.countDown();
         }
     }
@@ -116,18 +134,18 @@ public class SimpleBetAcceptor implements BetAcceptor {
      * do not block the game thread when calculating it
      */
     private class CalculatePrices implements Runnable {
-        private List<Bet> bets;
-        private RoundResult result;
+        private List<ProvablyFairBet> provablyFairBets;
+        private ProvablyFairResult result;
 
-        public CalculatePrices(List<Bet> bets, RoundResult result) {
-            this.bets = bets;
+        public CalculatePrices(List<ProvablyFairBet> provablyFairBets, ProvablyFairResult result) {
+            this.provablyFairBets = provablyFairBets;
             this.result = result;
         }
 
         @Override
         public void run() {
-            for (Bet bet : bets) {
-                bet.calculatePrice(result);
+            for (ProvablyFairBet provablyFairBet : provablyFairBets) {
+                provablyFairBet.calculatePrice(result);
             }
         }
     }
