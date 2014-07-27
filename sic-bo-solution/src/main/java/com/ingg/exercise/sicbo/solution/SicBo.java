@@ -50,11 +50,14 @@ public class SicBo implements Table, DealerObserver {
      */
     public SicBo(ResultDisplay resultDisplay) {
         this.resultDisplay = resultDisplay;
-        //TODO: do not forget to configure here the rest of dependencies before sending the solution back.
+        SessionRandomGenerator generator = new SessionRandomGenerator();
+        this.randomStringGenerator = generator;
+        this.betAcceptorFactory = new SimpleBetAcceptorFactory();
+        this.dealer = new NormalDealer(generator,5_000);
     }
 
     @Override
-    public void open() {
+    public synchronized void open() {
         dealer.subscribe(this);
         startNewRound();
     }
@@ -65,13 +68,13 @@ public class SicBo implements Table, DealerObserver {
     }
 
     @Override
-    public void close() {
+    public synchronized void close() {
         Iterable<Integer> lastRoll = dealer.stop();
         finishRound(lastRoll);
     }
 
     @Override
-    public BetFuture acceptBet(Selection selection, Integer stake) throws TableClosedException {
+    public synchronized BetFuture acceptBet(Selection selection, Integer stake) throws TableClosedException {
         if (betAcceptor == null) {
             throw new TableClosedException();
         }
@@ -79,7 +82,7 @@ public class SicBo implements Table, DealerObserver {
     }
 
     @Override
-    public void newRoll(Iterable<Integer> roll) {
+    public synchronized void newRoll(Iterable<Integer> roll) {
         finishRound(roll);
         resultDisplay.displayResult(currentRoundId, roll);
         startNewRound();
