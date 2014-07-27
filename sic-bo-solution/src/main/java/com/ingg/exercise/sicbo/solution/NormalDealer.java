@@ -39,13 +39,17 @@ public class NormalDealer implements Dealer, Runnable {
 
     @Override
     public void run() {
-        while (getExecute()) {
+        while (true) {
             try {
                 Thread.sleep(timeout);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            observer.newRoll(newRoll());
+            if (getExecute()) {
+                observer.newRoll(newRoll());
+            } else {
+                return;
+            }
         }
     }
 
