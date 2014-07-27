@@ -64,8 +64,8 @@ public class SicBo implements Table, DealerObserver {
         if (open) {
             throw new RuntimeException("This table is already opened");
         }
-        dealer.subscribe(this);
         startNewRound();
+        dealer.subscribe(this);
         open = true;
     }
 
