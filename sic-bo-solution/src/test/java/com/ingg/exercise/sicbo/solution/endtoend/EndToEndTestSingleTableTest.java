@@ -6,6 +6,7 @@ import org.junit.Test;
 
 import java.util.*;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -27,10 +28,12 @@ public class EndToEndTestSingleTableTest {
             playerList.add(new Player(i, table, 100));
         }
 
-        Executor executor = Executors.newFixedThreadPool(playerList.size());
+        ExecutorService executor = Executors.newFixedThreadPool(playerList.size());
         for (Player player : playerList) {
             executor.execute(player);
         }
+        executor.shutdown();
+
 
         Thread.sleep(1000);
         System.out.println("Opening table for 60 seconds");

@@ -81,6 +81,7 @@ public class EndToEndMultipleTablesTest {
 
             System.out.println("There was " + totalBets + " placed bets by " + playerList.size() + " players on table " + id);
             latch.countDown();
+            playersService.shutdownNow();
         }
     }
 }
