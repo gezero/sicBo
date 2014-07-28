@@ -8,6 +8,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -63,8 +64,9 @@ public class SimpleBetAcceptor implements BetAcceptor {
         if (!active) {
             throw new RuntimeException("Price can be calculated only once");
         }
-        Executor executor = Executors.newSingleThreadExecutor();
+        ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(new CalculatePrices(bets, result));
+        executor.shutdown();
         active = false;
     }
 

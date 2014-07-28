@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
@@ -18,24 +19,29 @@ public class EndToEndMultipleTablesTest {
 
     @Test
     public void testEndToEnd() throws InterruptedException {
-        int tables = 50;
+        int tables = 1000;
         CountDownLatch latch = new CountDownLatch(tables);
         SecureRandom random = new SecureRandom();
-        Executor executor = Executors.newFixedThreadPool(10);
+        ExecutorService playersThreads = Executors.newFixedThreadPool(100);
+        ExecutorService executor = Executors.newFixedThreadPool(10);
         for (int i = 0; i < tables; i++) {
-            executor.execute(new RunTableTest(i, latch, random.nextInt(50) * 200 + 1000));
+            executor.execute(new RunTableTest(i, latch,playersThreads, random.nextInt(50) * 200 + 1000));
         }
+        executor.shutdown();
         latch.await();
+        playersThreads.shutdown();
     }
 
     private class RunTableTest implements Runnable {
         private int id;
         private CountDownLatch latch;
+        private ExecutorService executorService;
         private long openedTime;
 
-        public RunTableTest(int id, CountDownLatch latch, long openedTime) {
+        public RunTableTest(int id, CountDownLatch latch, ExecutorService executorService, long openedTime) {
             this.id = id;
             this.latch = latch;
+            this.executorService = executorService;
             this.openedTime = openedTime;
         }
 
@@ -57,9 +63,8 @@ public class EndToEndMultipleTablesTest {
                 playerList.add(new Player(i, table, 1000));
             }
 
-            Executor executor = Executors.newFixedThreadPool(playerList.size());
             for (Player player : playerList) {
-                executor.execute(player);
+                executorService.execute(player);
             }
 
             Thread.sleep(1000);
