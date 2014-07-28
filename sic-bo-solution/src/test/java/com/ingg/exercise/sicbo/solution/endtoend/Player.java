@@ -48,7 +48,7 @@ public class Player implements Runnable {
             try {
                 Thread.sleep((random.nextInt(5)*50) + minimumWaitingTimout);
             } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+                return;
             }
         }
 //        System.out.println("Player did not have chance to bet...");
