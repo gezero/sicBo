@@ -8,7 +8,6 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -19,29 +18,25 @@ public class EndToEndMultipleTablesTest {
 
     @Test
     public void testEndToEnd() throws InterruptedException {
-        int tables = 1000;
-        CountDownLatch latch = new CountDownLatch(tables);
+        int tables = 50;
+        CountDownLatch latch = new CountDownLatch(tables+1);
         SecureRandom random = new SecureRandom();
-        ExecutorService playersThreads = Executors.newFixedThreadPool(100);
         ExecutorService executor = Executors.newFixedThreadPool(10);
         for (int i = 0; i < tables; i++) {
-            executor.execute(new RunTableTest(i, latch,playersThreads, random.nextInt(50) * 200 + 1000));
+            executor.execute(new RunTableTest(i, latch, random.nextInt(12) * 2000 + 1000));
         }
         executor.shutdown();
         latch.await();
-        playersThreads.shutdown();
     }
 
     private class RunTableTest implements Runnable {
         private int id;
         private CountDownLatch latch;
-        private ExecutorService executorService;
         private long openedTime;
 
-        public RunTableTest(int id, CountDownLatch latch, ExecutorService executorService, long openedTime) {
+        public RunTableTest(int id, CountDownLatch latch, long openedTime) {
             this.id = id;
             this.latch = latch;
-            this.executorService = executorService;
             this.openedTime = openedTime;
         }
 
@@ -59,13 +54,15 @@ public class EndToEndMultipleTablesTest {
             Table table = new SicBo(resultGatherer);
 
             List<Player> playerList = new ArrayList<>();
-            for (int i = 0; i < 60; i++) {
+            for (int i = 0; i < 20; i++) {
                 playerList.add(new Player(i, table, 1000));
             }
 
+            ExecutorService playersService = Executors.newFixedThreadPool(10);
             for (Player player : playerList) {
-                executorService.execute(player);
+                playersService.execute(player);
             }
+            playersService.shutdown();
 
             Thread.sleep(1000);
             System.out.println("Opening table " + id + " for " + openedTime / 1000 + " seconds");

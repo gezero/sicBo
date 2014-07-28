@@ -29,7 +29,8 @@ public class Player implements Runnable {
 
     @Override
     public void run() {
-        while (true) {
+        int counter = 0;
+        while (counter<5) {
             Selection selection = random.nextInt(2) == 0 ? Selection.BIG : Selection.SMALL;
             int stake = random.nextInt(500);
             try {
@@ -40,6 +41,9 @@ public class Player implements Runnable {
                 if (betted) {
                     return;
                 }
+                else{
+                    counter++;
+                }
             }
             try {
                 Thread.sleep((random.nextInt(5)*50) + minimumWaitingTimout);
@@ -47,6 +51,7 @@ public class Player implements Runnable {
                 throw new RuntimeException(e);
             }
         }
+//        System.out.println("Player did not have chance to bet...");
     }
 
     public int checkBets(ResultGatherer resultGatherer) throws InterruptedException {
