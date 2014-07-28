@@ -18,7 +18,7 @@ public class EndToEndMultipleTablesTest {
 
     @Test
     public void testEndToEnd() throws InterruptedException {
-        int tables = 50;
+        int tables = 30;
         CountDownLatch latch = new CountDownLatch(tables+1);
         SecureRandom random = new SecureRandom();
         ExecutorService executor = Executors.newFixedThreadPool(10);
