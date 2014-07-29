@@ -12,6 +12,13 @@ import static org.junit.Assert.assertThat;
 
 public class NormalDealerTest {
 
+
+    @Test
+    public void shit() throws Exception {
+        for (int i = 0; i < 100; i++) {
+            testFlow();
+        }
+    }
     @Test
     public void testFlow() throws Exception {
         NormalDealer dealer = new NormalDealer(new SessionRandomGenerator(), 300);

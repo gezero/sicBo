@@ -3,6 +3,7 @@ package com.ingg.exercise.sicbo.solution;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
@@ -26,8 +27,9 @@ public class NormalDealer implements Dealer, Runnable {
             throw new RuntimeException("You can subscribe only once");
         }
         this.observer =observer;
-        Executor executor = Executors.newSingleThreadExecutor();
+        ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(this);
+        executor.shutdown();
         return newRoll();
     }
 
