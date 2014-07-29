@@ -10,7 +10,8 @@ import static org.junit.Assert.*;
 
 public class SessionRandomGeneratorTest {
 
-    SessionRandomGenerator randomGenerator = new SessionRandomGenerator();
+    byte[] SEED = {1,2,3,4,5};
+    SessionRandomGenerator randomGenerator = new SessionRandomGenerator(SEED);
 
     @Test
     public void testSomeGeneration() throws Exception {

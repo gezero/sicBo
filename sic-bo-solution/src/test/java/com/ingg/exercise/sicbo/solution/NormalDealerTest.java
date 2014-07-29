@@ -13,15 +13,11 @@ import static org.junit.Assert.assertThat;
 public class NormalDealerTest {
 
 
-    @Test
-    public void shit() throws Exception {
-        for (int i = 0; i < 100; i++) {
-            testFlow();
-        }
-    }
+    private static final byte[] SEED = {1,2,3,4,5};
+
     @Test
     public void testFlow() throws Exception {
-        NormalDealer dealer = new NormalDealer(new SessionRandomGenerator(), 300);
+        NormalDealer dealer = new NormalDealer(new SessionRandomGenerator(SEED), 300);
 
         RollCollector rollCollector = new RollCollector();
         Iterable<Integer> firstRoll = dealer.subscribe(rollCollector);
@@ -59,7 +55,7 @@ public class NormalDealerTest {
 
     @Test(expected = RuntimeException.class)
     public void testCannotSubscribeTwice(){
-        NormalDealer dealer = new NormalDealer(new SessionRandomGenerator(),100);
+        NormalDealer dealer = new NormalDealer(new SessionRandomGenerator(SEED),100);
         RollCollector rollCollector = new RollCollector();
         dealer.subscribe(rollCollector);
         dealer.subscribe(rollCollector);

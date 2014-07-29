@@ -7,7 +7,15 @@ import java.security.SecureRandom;
  * @author Jiri
  */
 public class SessionRandomGenerator implements RandomStringGenerator, RandomIntegerGenerator {
-    private SecureRandom random = new SecureRandom();
+    private SecureRandom random;
+
+    public SessionRandomGenerator(byte[] seed) {
+        random = new SecureRandom(seed);
+    }
+
+    public SessionRandomGenerator() {
+        this.random = new SecureRandom();
+    }
 
     @Override
     public String generateString() {

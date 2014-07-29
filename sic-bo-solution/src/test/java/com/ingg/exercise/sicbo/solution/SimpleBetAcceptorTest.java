@@ -81,7 +81,7 @@ public class SimpleBetAcceptorTest {
 
 
     @Test(expected = TableClosedException.class)
-    public void testCannotAcceptNewBetsAfterCaluclatedResult() throws TableClosedException {
+    public void testCannotAcceptNewBetsAfterCalculatedResult() throws TableClosedException {
         SimpleBetAcceptor betAcceptor = new SimpleBetAcceptor("round");
         betAcceptor.finishRound(new ImmutableRoundResult(Arrays.asList(1, 2, 3)));
         betAcceptor.acceptBet(Selection.BIG, Integer.MAX_VALUE / 2);

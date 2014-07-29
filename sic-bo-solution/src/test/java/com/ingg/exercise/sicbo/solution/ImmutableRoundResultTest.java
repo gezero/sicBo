@@ -10,7 +10,7 @@ import static org.junit.Assert.assertThat;
 
 public class ImmutableRoundResultTest {
     ImmutableRoundResult small = new ImmutableRoundResult(Arrays.asList(1, 2, 3));
-    ImmutableRoundResult small_tripple = new ImmutableRoundResult(Arrays.asList(2, 2, 2));
+    ImmutableRoundResult small_triple = new ImmutableRoundResult(Arrays.asList(2, 2, 2));
     ImmutableRoundResult big = new ImmutableRoundResult(Arrays.asList(4, 5, 5));
     ImmutableRoundResult big_triple = new ImmutableRoundResult(Arrays.asList(6, 6, 6));
 
@@ -22,8 +22,8 @@ public class ImmutableRoundResultTest {
         assertThat(big.calculatePrice(Selection.SMALL, 10), is(0));
         assertThat(big.calculatePrice(Selection.BIG, 10), is(20));
 
-        assertThat(small_tripple.calculatePrice(Selection.SMALL, 10), is(0));
-        assertThat(small_tripple.calculatePrice(Selection.BIG, 10), is(0));
+        assertThat(small_triple.calculatePrice(Selection.SMALL, 10), is(0));
+        assertThat(small_triple.calculatePrice(Selection.BIG, 10), is(0));
 
         assertThat(big_triple.calculatePrice(Selection.SMALL, 10), is(0));
         assertThat(big_triple.calculatePrice(Selection.BIG, 10), is(0));
@@ -33,7 +33,7 @@ public class ImmutableRoundResultTest {
     @Test
     public void testToString() throws Exception {
         assertThat(small.toString(), is("SMALL"));
-        assertThat(small_tripple.toString(), is("TRIPLE"));
+        assertThat(small_triple.toString(), is("TRIPLE"));
         assertThat(big.toString(), is("BIG"));
         assertThat(big_triple.toString(), is("TRIPLE"));
     }
